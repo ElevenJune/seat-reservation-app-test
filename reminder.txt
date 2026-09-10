@@ -1,0 +1,58 @@
+==================================================
+AIDE-MEMOIRE DES COMMANDES PRISMA & PNPM (Projet Serveur)
+==================================================
+
+1. GÉNÉRATION DU CLIENT PRISMA
+Commande : pnpm exec prisma generate
+Rôle     : Génère les fichiers TypeScript du client Prisma à partir du schema.prisma.
+À utiliser : Oui (indispensable après chaque modification du schéma).
+
+2. MIGRATION DE LA BASE DE DONNÉES
+Commande : pnpm exec prisma migrate dev --name <nom_migration>
+Rôle     : Crée une migration SQL et l'applique sur la base SQLite de développement.
+À utiliser : Oui (pour modifier la structure des tables).
+
+3. EXÉCUTION D'UN SCRIPT TYPESCRIPT PONCTUEL (Seed, Test)
+Commande : pnpm dlx tsx <chemin_du_script.ts>
+Rôle     : Télécharge et exécute à la volée un fichier TypeScript sans l'installer durablement.
+À utiliser : Oui (pour les tests ou scripts de peuplement).
+
+4. INSTALLATION D'UNE DÉPENDANCE DE DÉVELOPPEMENT
+Commande : pnpm add -D <paquet>
+Rôle     : Installe un outil dans les dépendances de développement du projet.
+À utiliser : Oui (si tu veux installer `tsx` en local pour faire `pnpm exec tsx` au lieu de `dlx`).
+
+5. INSTALLATION D'UNE DÉPENDANCE DE PRODUCTION
+Commande : pnpm add <paquet>
+Rôle     : Installe une bibliothèque nécessaire au fonctionnement du serveur (ex: dotenv).
+À utiliser : Oui.
+
+6. VOIR LA BDD
+npx prisma studio
+
+--------------------------------------------------
+À ÉVITER :
+- pnpm dlx prisma ... (Préférer `pnpm exec prisma` pour utiliser la version exacte installée localement).
+- pnpm dlx ts-node ... (Préférer `tsx` qui gère l'ESM moderne nativement).
+==================================================
+
+
+Récapitulatif des outils
+
+npm (Node Package Manager) : Le gestionnaire de paquets historique.
+Rôle : Télécharge et installe les dépendances.
+Comportement : Duplique tous les paquets dans le dossier local node_modules de chaque projet, ce qui consomme rapidement beaucoup d'espace disque.
+
+pnpm (Performant npm) : Le gestionnaire de paquets optimisé à utiliser sur ce projet.
+Rôle : Remplace npm pour l'installation et la gestion du monorepo.
+Comportement : Stocke les paquets une seule fois dans un magasin global (store) et utilise des liens durs (hard links). Il est beaucoup plus rapide et préserve ton espace disque.
+
+npx (Node Package Execute) : L'exécuteur de commande fourni par l'écosystème npm.
+Rôle : Cherche et exécute un outil CLI. Il regarde en priorité dans le dossier local node_modules/.bin du projet, ou télécharge temporairement l'outil s'il n'est pas présent.
+
+pnpm dlx (Download & Execute) : L'équivalent pnpm du téléchargement temporaire de npx.
+Rôle : Télécharge la dernière version distante d'un outil dans un dossier éphémère, l'exécute, puis la supprime.
+Piège : Il ignore les paquets déjà installés dans ton projet et va chercher tout le sous-système distant, ce qui peut télécharger des dépendances inutiles.
+
+pnpm exec : L'exécuteur local dédié de pnpm.
+Rôle : Exécute de manière stricte un binaire déjà installé localement dans le node_modules de ton projet.

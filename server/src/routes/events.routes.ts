@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { prisma, SeatStatus } from '../lib/prisma';
-import { releaseExpiredSeats } from '../services/seatService';
+import { releaseExpiredSeats, lockSeat, unlockSeat } from '../services/seatService';
 import {
   userSectionSchema,
   eventSchema,
@@ -19,14 +19,16 @@ export async function eventRoutes(app: FastifyInstance) {
     });
 
   fastify.get(
-    '/api/events',
+    '/api/events/:id',
     { schema : eventSchema},
     async (request) => {
+        const { id } = request.params;
         const {seats} = request.query;
         const allEvents = await prisma.event.findMany({
             include:{
                 seats:(seats===true)
-            }
+            },
+            where: { id }
         });
         return {allEvents};
   });
@@ -46,19 +48,29 @@ export async function eventRoutes(app: FastifyInstance) {
       return { "list":filtered, "order":asc };
   });
 
-  fastify.post(
+fastify.post(
     '/api/seats/:row/:number/lock',
     { schema: lockSeatSchema },
     async (request, reply) => {
         const { row, number } = request.params;
-        const result = await prisma.seat.updateMany({
-            where: { row, number, status:SeatStatus.AVAILABLE },
-            data : {status:SeatStatus.LOCKED, lockedAt:new Date()}
-        });
+        const result = await lockSeat(row,number)
         if (result.count === 0) {
             return reply.status(409).send({ error: "Seat already locked or not found" });
     }
 
     return { success: true, message: `Seat ${row}${number} locked` };
+  });
+
+fastify.post(
+    '/api/seats/:row/:number/unlock',
+    { schema: lockSeatSchema },
+    async (request, reply) => {
+        const { row, number } = request.params;
+        const result = await unlockSeat(row,number)
+        if (result.count === 0) {
+            return reply.status(409).send({ error: "Seat already unlocked or not found" });
+    }
+
+    return { success: true, message: `Seat ${row}${number} unlocked` };
   });
 }

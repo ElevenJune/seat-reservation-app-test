@@ -29,9 +29,12 @@ export const userSectionSchema = {
 
 
 export const eventSchema = {
-    querystring : z.object({
-        seats: optionalBoolSchema(false)
-    })
+  params: z.object({
+    id: z.string().optional()
+  }),
+  querystring : z.object({
+      seats: optionalBoolSchema(false)
+  })
 }
 
 export const lockSeatSchema = {

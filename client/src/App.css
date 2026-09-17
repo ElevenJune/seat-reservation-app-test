@@ -17,6 +17,11 @@
   }
 }
 
+.seats-preview{
+  display:flex;
+  flex-direction:row;
+}
+
 .hero {
   position: relative;
 

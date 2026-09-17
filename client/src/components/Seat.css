@@ -1,0 +1,39 @@
+.seat {
+  width: 50px;
+  height: 60px;
+  background-color: #3b82f6;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  margin: 4px;
+}
+
+.seat:hover:not(:disabled) {
+  transform: scale(1.05);
+}
+
+/* Variations de couleur selon l'état */
+.available {
+  background-color: #10b981; /* Vert */
+}
+
+.available:hover {
+  background-color: #059669;
+}
+
+.locked {
+  background-color: #f59e0b; /* Orange / Ambre */
+  cursor: wait;
+}
+
+.booked {
+  background-color: #9ca3af; /* Gris */
+  color: #374151;
+  cursor: not-allowed;
+}
+
+.seat[data-status="AVAILABLE"] { background-color: #10b981; }
+.seat[data-status="LOCKED"]    { background-color: #f59e0b; }
+.seat[data-status="BOOKED"]    { background-color: #9ca3af; }

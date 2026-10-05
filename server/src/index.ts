@@ -2,11 +2,13 @@ import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import { ZodTypeProvider, serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod';
 import { eventRoutes } from './routes/events.routes';
+// Dans le point d'entrée de ton serveur (ex: apps/server/src/index.ts)
+export type { GetEventsResponse } from './schemas/events.schema';
 
 // Ajouter après les configurations de validator/serializer
 
 
-const fastify = Fastify({ logger: true }).withTypeProvider<ZodTypeProvider>();
+const fastify = Fastify({logger: true }).withTypeProvider<ZodTypeProvider>();
 fastify.setValidatorCompiler(validatorCompiler);
 fastify.setSerializerCompiler(serializerCompiler);
 

@@ -4,7 +4,7 @@ import { prisma, SeatStatus } from '../lib/prisma';
 import { releaseExpiredSeats, lockSeat, unlockSeat } from '../services/seatService';
 import {
   userSectionSchema,
-  eventSchema,
+  eventsSchema,
   lockSeatSchema,
   
 } from '../schemas/events.schema';
@@ -13,6 +13,7 @@ import { networkInterfaces } from 'os';
 export async function eventRoutes(app: FastifyInstance) {
   const fastify = app.withTypeProvider<ZodTypeProvider>();
 
+
   fastify.addHook('preHandler', async (request, reply) => {
     if(request.url.includes("seat"))
         await releaseExpiredSeats();
@@ -20,17 +21,18 @@ export async function eventRoutes(app: FastifyInstance) {
 
   fastify.get(
     '/api/events/:id',
-    { schema : eventSchema},
+    { schema : eventsSchema},
     async (request) => {
         const { id } = request.params;
         const {seats} = request.query;
-        const allEvents = await prisma.event.findMany({
+        const events = await prisma.event.findMany({
             include:{
                 seats:(seats===true)
             },
-            where: { id }
+            where: { id:id }
         });
-        return {allEvents};
+        //console.log(id,allEvents)
+        return {events};
   });
 
   fastify.get(

@@ -25,7 +25,7 @@
 
 .locked {
   background-color: #f59e0b; /* Orange / Ambre */
-  cursor: wait;
+  /*cursor: wait;*/
 }
 
 .booked {

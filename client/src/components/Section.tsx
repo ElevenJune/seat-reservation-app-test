@@ -1,7 +1,7 @@
 import {useMemo } from 'react';
 import './Section.css';
 import { Seat } from './Seat';
-import { type Seat as SeatType } from '@server/schemas/seat';
+import type { SeatType } from '../types/seat';
 
 interface SectionProps {
   seats: SeatType[],

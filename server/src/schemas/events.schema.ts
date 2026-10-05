@@ -1,5 +1,5 @@
 import {boolean, z} from 'zod'
-import { required } from 'zod/mini';
+import { EventSchema, SeatSchema } from '../generated/zod';
 
 const optionalBoolSchema = (defaultValue = false) => z
   .union([z.boolean(), z.string(), z.number()])
@@ -28,14 +28,25 @@ export const userSectionSchema = {
 };
 
 
-export const eventSchema = {
-  params: z.object({
+export const eventsSchema = {
+  params: z.object({ //Factorize when needed
     id: z.string().optional()
   }),
   querystring : z.object({
-      seats: optionalBoolSchema(false)
-  })
+      seats: optionalBoolSchema(true)
+  }),
+  response: {
+    200: z.object({
+      events: z.array(
+        EventSchema.extend({
+          seats: z.array(SeatSchema).optional(),
+        })
+      ),
+    }),
+  },
 }
+
+export type GetEventsResponse = z.infer<typeof eventsSchema.response[200]>;
 
 export const lockSeatSchema = {
   // Paramètres d'URL (:row)

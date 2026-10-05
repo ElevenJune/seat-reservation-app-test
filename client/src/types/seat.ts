@@ -1,9 +1,9 @@
 // 1. Re-exportation des TYPES purement statiques
 // (Seront totalement effacés dans le build final du navigateur)
-export type { Seat as SeatType, SeatStatus as SeatStatusType } from '@server/schemas/seat';
+export type { Seat as SeatType, SeatStatus as SeatStatusType } from '@server/schemas/types';
 
 // 2. Re-exportation des VALEURS (ex: si SeatStatus est un Enum/Object utilisé dans le JS)
-export { SeatStatus } from '@server/schemas/seat';
+export { SeatStatus } from '@server/schemas/types';
 
 // 3. Types spécifiques au Frontend (UI)
 /*export interface SeatUIState {

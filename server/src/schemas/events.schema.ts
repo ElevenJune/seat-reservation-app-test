@@ -1,4 +1,4 @@
-import {boolean, z} from 'zod'
+import {boolean, number, z} from 'zod'
 import { EventSchema, SeatSchema } from '../generated/zod';
 
 const optionalBoolSchema = (defaultValue = false) => z
@@ -53,5 +53,17 @@ export const lockSeatSchema = {
   params: z.object({
     row: RowEnum,
     number: z.coerce.number().min(1).max(10)
-  })
+  }),
+  response:{
+    200: z.object({
+      row: RowEnum,
+      number:z.number(),
+      locked:z.boolean()
+    }),
+    '4xx':z.object({
+      error:z.string()
+    })
+  }
 };
+
+export type LockSeatResponse = z.infer<typeof lockSeatSchema.response[200]>;

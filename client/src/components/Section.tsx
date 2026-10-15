@@ -20,7 +20,7 @@ export const Section: React.FC<SectionProps> = ({ seats, onClicked }) => {
   return(
     <>
     {rows.map((row)=>(
-    <div className='row'>
+    <div className='row' key={row}>
       <p>{row}</p>
       {
             seats

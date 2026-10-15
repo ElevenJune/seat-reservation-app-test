@@ -18,16 +18,16 @@ export async function releaseExpiredSeats() {
   return result.count;
 }
 
-export async function lockSeat(row:string,number:number){
+export async function lockSeat(id:string){
   return await prisma.seat.updateMany({
-    where: { row, number, status:SeatStatus.AVAILABLE },
+    where: { id, status:SeatStatus.AVAILABLE },
     data : {status:SeatStatus.LOCKED, lockedAt:new Date()}
   });
 }
 
-export async function unlockSeat(row:string,number:number){
+export async function unlockSeat(id:string){
   return await prisma.seat.updateMany({
-    where: { row, number, status:SeatStatus.LOCKED },
+    where: { id, status:SeatStatus.LOCKED },
     data : {status:SeatStatus.AVAILABLE, lockedAt:null}
   });
 }

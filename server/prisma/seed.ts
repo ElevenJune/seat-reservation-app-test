@@ -7,27 +7,46 @@ async function main() {
   await prisma.seat.deleteMany();
   await prisma.event.deleteMany();
 
-  const event = await prisma.event.create({
+  const eventKP = await prisma.event.create({
     data: {
-      title: "Concert Live Salle Principale",
+      title: "Katy Perry",
       date: new Date(),
     },
   });
-  const seatsData = [];
-  const rows = ['A', 'B', 'C', 'D'];
+  const eventO = await prisma.event.create({
+    data: {
+      title: "Orelsan",
+      date: new Date(),
+    },
+  });
+  const seatsDataKP = [];
+  const seatsDataO = [];
+  const rows = ['A', 'B', 'C', 'D','E','F'];
   for (const row of rows) {
+    for (let num = 1; num <= 15; num++) {
+      seatsDataO.push({
+        row,
+        number: num,
+        price: 60.0,
+        status: SeatStatus.AVAILABLE,
+        eventId: eventO.id,
+      });
+    }
+    if(row=="E"||row=="F")
+      continue
     for (let num = 1; num <= 10; num++) {
-      seatsData.push({
+      seatsDataKP.push({
         row,
         number: num,
         price: 50.0,
         status: SeatStatus.AVAILABLE,
-        eventId: event.id,
+        eventId: eventKP.id,
       });
     }
   }
-  await prisma.seat.createMany({ data: seatsData });
-  console.log("Seeding terminé : Événement et 40 sièges créés.");
+  await prisma.seat.createMany({ data: seatsDataKP });
+  await prisma.seat.createMany({ data: seatsDataO });
+  console.log("Seeding terminé");
 
 }
 

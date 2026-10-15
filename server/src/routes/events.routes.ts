@@ -8,29 +8,42 @@ import {
 } from "../services/seatService";
 import {
   userSectionSchema,
+  eventSchema,
   eventsSchema,
-  lockSeatSchema,
+  lockSeatSchema
 } from "../schemas/events.schema";
-import { networkInterfaces } from "os";
+import { API_PATHS } from "../constants/routes";
 
 export async function eventRoutes(app: FastifyInstance) {
+
   const fastify = app.withTypeProvider<ZodTypeProvider>();
 
   fastify.addHook("preHandler", async (request, reply) => {
-    if (request.url.includes("seat")) await releaseExpiredSeats();
+    if (request.url.includes("seat") || request.url.includes("events")) await releaseExpiredSeats();
   });
 
-  fastify.get("/api/events/:id", { schema: eventsSchema }, async (request) => {
+  fastify.get("/api/events/:id", { schema: eventSchema }, async (request, reply) => {
     const { id } = request.params;
     const { seats } = request.query;
-    const events = await prisma.event.findMany({
+    const event = await prisma.event.findUnique({
       include: {
         seats: seats === true,
       },
       where: { id: id },
     });
-    //console.log(id,allEvents)
-    return { events };
+    if (event)
+      return { event };
+    else
+      return reply.status(404).send({error:"No event found with ID "+id});
+      
+  });
+
+  fastify.get("/api/events", { schema: eventsSchema }, async (request, reply) => {
+    const events = await prisma.event.findMany();
+    if (events)
+      return { events };
+    else
+      return reply.status(404).send({error:"No event found "});
   });
 
   fastify.get(
@@ -50,35 +63,34 @@ export async function eventRoutes(app: FastifyInstance) {
   );
 
   fastify.post(
-    "/api/seats/:row/:number/lock",
+    API_PATHS.LOCK_SEAT,
     { schema: lockSeatSchema },
     async (request, reply) => {
-      const { row, number } = request.params;
-      const result = await lockSeat(row, number);
+      const { seatId } = request.params;
+      const result = await lockSeat(seatId);
       if (result.count === 0) {
         return reply
-          .status(409)
+          .status(404)
           .send({ error: "Seat already locked or not found" });
       }
-
-      return reply.status(200).send({row,number,locked:true});
+      return reply.status(200).send({seatId,locked:true});
       //return { success: true, message: `Seat ${row}${number} locked` };
     },
   );
 
   fastify.post(
-    "/api/seats/:row/:number/unlock",
+    API_PATHS.UNLOCK_SEAT,
     { schema: lockSeatSchema },
     async (request, reply) => {
-      const { row, number } = request.params;
-      const result = await unlockSeat(row, number);
+      const { seatId } = request.params;
+      const result = await unlockSeat(seatId);
       if (result.count === 0) {
         return reply
-          .status(409)
+          .status(404)
           .send({ error: "Seat already unlocked or not found" });
       }
 
-      return reply.status(200).send({row,number,locked:false});
+      return reply.status(200).send({seatId,locked:false});
     },
   );
 }

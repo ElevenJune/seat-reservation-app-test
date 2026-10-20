@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
+import { useNavigate } from 'react-router-dom';
 import "./Section.css";
 import { Seat } from "./Seat";
 import { type SeatType, SeatStatus } from "../types/seat";
@@ -23,6 +24,7 @@ const appRoutes = {
 
 export const Section: React.FC<SectionProps> = ({ eventId }) => {
   const [seats, setSeats] = useState<SeatType[]>([]);
+  const navigate = useNavigate()
 
   const rows = useMemo(() => {
     return seats.reduce((acc: string[], seat) => {
@@ -32,6 +34,10 @@ export const Section: React.FC<SectionProps> = ({ eventId }) => {
   }, [seats]);
 
   useEffect(() => {
+    if(!eventId){
+      navigate("/")
+      return;
+    }
     updateSeats(eventId);
     console.log("selectedEventIndex changed", eventId);
     setInterval(() => {

@@ -1,5 +1,6 @@
 import React from "react";
 import { useEffect, useState } from "react";
+import { useNavigate } from 'react-router-dom';
 import type { Event } from "@server/schemas/types";
 import apiClient from "../api/axios";
 import { isAxiosError } from "axios";
@@ -19,6 +20,7 @@ export const EventSelector: React.FC<EventSelectorProps> = ({
 }) => {
   const [selectedEventIndex, setselectedEventIndex] = useState<number>(-1);
   const [events, setEvents] = useState<Event[]>([]);
+  const navigate = useNavigate()
 
   //Startup
   useEffect(() => {
@@ -32,6 +34,7 @@ export const EventSelector: React.FC<EventSelectorProps> = ({
     const id = events[index].id;
     console.log("New id",id)
     onEventChanged(id);
+    navigate('/event'); 
   }
 
   function updateEvents() {

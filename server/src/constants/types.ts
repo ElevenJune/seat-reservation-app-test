@@ -1,5 +1,3 @@
-export { appRoutes } from "./routes";
-
 export type {
   GetEventResponse,
   GetEventsResponse,

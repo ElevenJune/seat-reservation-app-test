@@ -4,8 +4,3 @@ export const API_PATHS = {
   LOCK_SEAT: '/api/seats/:seatId/lock',
   UNLOCK_SEAT: '/api/seats/:seatId/unlock',
 } as const;
-
-export const appRoutes = {
-  lockSeat: (seatId: string, action: string) => 
-    `/api/seats/${seatId}/${action}`,
-};

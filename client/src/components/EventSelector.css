@@ -1,0 +1,20 @@
+.select {
+  width: 50px;
+  height: 60px;
+  background-color: #3b82f6;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  margin: 4px;
+}
+
+.select:hover{
+    background-color: red;
+    transform: scale(1.05);
+}
+
+li {
+    text-align: left;
+}

@@ -1,5 +1,39 @@
 .row {
-  display:flex;
-  flex-direction:row;
+  display: flex;
+  flex-direction: row;
   align-items: center;
+  justify-content: center;
+}
+
+.back {
+  margin-top: 20px;
+  border-radius: 10px;
+  padding-left: 20px;
+  padding-right: 20px;
+  height: 30px;
+  background-color: antiquewhite;
+  color: black;
+  border: 2px solid black;
+}
+
+.map {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  /* PADDING BUFFER : Crée de l'espace autour des sièges pour le pan */
+  padding: 100px;
+
+  /* TAILLE MINIMALE : Garantit que la carte dépasse l'écran sur mobile */
+  min-width: 600px;
+
+  box-sizing: border-box;
+}
+
+.seating-container {
+  width: 100%;
+  height: 80vh; /* ou une hauteur fixe en px */
+  overflow: hidden;
+  touch-action: none;
+  background-color: antiquewhite;
 }

@@ -19,6 +19,12 @@ async function main() {
       date: new Date(),
     },
   });
+  const eventNone = await prisma.event.create({
+    data: {
+      title: "Jean ToutSeul",
+      date: new Date(),
+    },
+  });
   const seatsDataKP = [];
   const seatsDataO = [];
   const rows = ['A', 'B', 'C', 'D','E','F'];

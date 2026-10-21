@@ -1,26 +1,22 @@
 import React from "react";
 import { useEffect, useState } from "react";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 import type { Event } from "@server/schemas/types";
 import apiClient from "../api/axios";
 import { isAxiosError } from "axios";
-import "./EventSelector.css"
+import "./EventSelector.css";
 
 import {
   type GetEventsResponse,
   type EventError,
 } from "@server/constants/types";
 
-interface EventSelectorProps {
-  onEventChanged: (id: string) => void;
-}
+interface EventSelectorProps {}
 
-export const EventSelector: React.FC<EventSelectorProps> = ({
-  onEventChanged,
-}) => {
+export const EventSelector: React.FC<EventSelectorProps> = ({}) => {
   const [selectedEventIndex, setselectedEventIndex] = useState<number>(-1);
   const [events, setEvents] = useState<Event[]>([]);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   //Startup
   useEffect(() => {
@@ -28,13 +24,12 @@ export const EventSelector: React.FC<EventSelectorProps> = ({
   }, []);
 
   function selectEvent(index: number) {
-    console.log("select event at index",index)
+    console.log("select event at index", index);
     setselectedEventIndex(index);
     if (index < 0 || index > events.length) return;
     const id = events[index].id;
-    console.log("New id",id)
-    onEventChanged(id);
-    navigate('/event'); 
+    console.log("New id", id);
+    navigate(`/event/${id}`);
   }
 
   function updateEvents() {
@@ -59,16 +54,24 @@ export const EventSelector: React.FC<EventSelectorProps> = ({
   }
 
   const listItems = events.map((event, index) => (
-    <li key={event.id}>
-        <b style={{ fontWeight: index === selectedEventIndex ? "bold" : "normal" }}>{event.title}:</b>
-        <p>{"at " + event.date + " "}</p>
-      <button className="select" onClick={()=>selectEvent(index)}>Select</button>
-    </li>
+    <div key={event.id} className="whole" onClick={() => selectEvent(index)}>
+      <div className="left">
+        <p className="title">
+          {event.title}
+        </p>
+        <p className="date">{event.date+""}</p>
+      </div>
+      <div className="right">
+        <button className="select" onClick={() => selectEvent(index)}>
+          Select
+        </button>
+      </div>
+    </div>
   ));
   return (
     <div>
       <h1>Events</h1>
-      <ul>{listItems}</ul>
+      <ul className="list">{listItems}</ul>
     </div>
   );
 };

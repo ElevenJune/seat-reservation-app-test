@@ -11,15 +11,14 @@ import { EventSelector } from "./components/EventSelector";
 
 
 function App() {
-  const [eventId, setEventId] = useState<string>("");
   const router = createBrowserRouter([
-  { path: '/', element: <EventSelector onEventChanged={setEventId} /> },
-  { path: '/event', element: <Section eventId={eventId} /> }
+  { path: '/', element: <EventSelector /> },
+  { path: '/event/:id', element: <Section /> }
 ]);
 
   return (
     <section id="center">
-      <div className="filler">
+      <div className="centered">
         <RouterProvider router={router} />
       </div>
     </section>

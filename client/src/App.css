@@ -5,7 +5,6 @@
   place-content: center;
   place-items: center;
   flex-grow: 1;
-  
 
   @media (max-width: 1024px) {
     padding: 32px 20px 24px;
@@ -13,12 +12,19 @@
   }
 }
 
-.centered{
+.centered {
   margin-bottom: auto;
   margin-top: auto;
   width: 100%;
 }
 
-.filler{
+.filler {
   flex-grow: 1;
+}
+:root {
+  --primary: #9fd3c7;
+  --primary-hover: #44a1a0ff;
+  --secondary: #385170;
+  --text-main: #142d4c;
+  --background:   #ececec;
 }

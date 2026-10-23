@@ -4,7 +4,9 @@ import { useNavigate } from "react-router-dom";
 import type { Event } from "@server/schemas/types";
 import apiClient from "../api/axios";
 import { isAxiosError } from "axios";
+
 import "./EventSelector.css";
+import { RoundedButton } from "./Widgets/RoundedButton";
 
 import {
   type GetEventsResponse,
@@ -14,7 +16,7 @@ import {
 interface EventSelectorProps {}
 
 export const EventSelector: React.FC<EventSelectorProps> = ({}) => {
-  const [selectedEventIndex, setselectedEventIndex] = useState<number>(-1);
+  const [_selectedEventIndex, setselectedEventIndex] = useState<number>(-1);
   const [events, setEvents] = useState<Event[]>([]);
   const navigate = useNavigate();
 
@@ -62,9 +64,9 @@ export const EventSelector: React.FC<EventSelectorProps> = ({}) => {
         <p className="date">{event.date+""}</p>
       </div>
       <div className="right">
-        <button className="select" onClick={() => selectEvent(index)}>
+        <RoundedButton backgroundColor="var(--primary)" onClick={() => selectEvent(index)}>
           Select
-        </button>
+        </RoundedButton>
       </div>
     </div>
   ));

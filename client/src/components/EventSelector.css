@@ -45,10 +45,11 @@
     font-weight: 600;
     font-size: larger;
     flex-grow: 1;
+    color: var(--text-main);
 }
 
 .date{
-    color: rgb(7, 135, 135);
+    color: var(--secondary)
 }
 
 .right{

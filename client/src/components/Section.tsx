@@ -1,11 +1,13 @@
 import { useMemo, useState, useEffect, useRef } from "react";
-import { useNavigate, useParams, Link } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import apiClient from "../api/axios";
 import { isAxiosError } from "axios";
 
 import "./Section.css";
 import { Seat } from "./Seat";
+import { VLayout } from "./Navigation/Layout";
+import { RoundedButton } from "./Widgets/RoundedButton";
 import { type SeatType, SeatStatus } from "../types/seat";
 import {
   type GetEventResponse,
@@ -53,14 +55,17 @@ export const Section: React.FC<SectionProps> = ({}) => {
   }, [eventId]);
 
   useEffect(() => {
-    function checkOverflow(){
-      if(containerRef.current && mapRef.current){
-        setIsOverflowing(containerRef.current.clientWidth < mapRef.current.scrollWidth
-          || containerRef.current.clientHeight < mapRef.current.scrollHeight)
+    function checkOverflow() {
+      if (containerRef.current && mapRef.current) {
+        setIsOverflowing(
+          containerRef.current.clientWidth < mapRef.current.scrollWidth ||
+            containerRef.current.clientHeight < mapRef.current.scrollHeight,
+        );
       }
     }
 
-    checkOverflow()
+    checkOverflow();
+    window.addEventListener("resize", checkOverflow);
   }, [seats]);
 
   function updateSeats(eventId: string) {
@@ -96,23 +101,26 @@ export const Section: React.FC<SectionProps> = ({}) => {
       });
   }
 
+  let component = null;
   if (notFound || seats.length == 0)
-    return (
-      <>
+    component = (
+      <div className="error">
         <h2>Oups...</h2>
         <p>
           {!notFound
             ? "Cet événement n'a aucun siège"
             : "Aucun événement n'a été trouvé avec cet ID."}
         </p>
-        <Link to="/">Retour à la liste des événements</Link>
-      </>
+      </div>
     );
-
-  return (
-    <div className="page">
+  else
+    component = (
       <div className="seating-container" ref={containerRef}>
-        <TransformWrapper centerOnInit={true} minScale={isOverflowing ? 0.8 : 1}>
+        <TransformWrapper
+          centerOnInit={true}
+          minScale={isOverflowing ? 0.8 : 1}
+          maxScale={1.2}
+        >
           <TransformComponent
             wrapperStyle={{ width: "100%", height: "100%" }}
             contentStyle={{
@@ -142,9 +150,12 @@ export const Section: React.FC<SectionProps> = ({}) => {
           </TransformComponent>
         </TransformWrapper>
       </div>
-      <button className="back" onClick={() => navigate("/")}>
-        Retour
-      </button>
-    </div>
+    );
+
+  return (
+    <VLayout justify="center" gap="10px">
+      {component}
+      <RoundedButton onClick={() => navigate("/")}>Retour</RoundedButton>
+    </VLayout>
   );
 };

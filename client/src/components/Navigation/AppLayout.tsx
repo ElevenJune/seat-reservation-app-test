@@ -4,7 +4,8 @@ import { VLayout } from "./Layout";
 
 export function AppLayout() {
   return (
-    <VLayout style={{ backgroundColor: "var(--background)", height:"100vh" }}>
+    <VLayout
+    style={{ backgroundColor: "var(--background)", height:"100vh" }}>
       <Toolbar />
       <main style={{ flex: 1, display: "flex", flexDirection: "column", width:"100%" }}>
         <Outlet />

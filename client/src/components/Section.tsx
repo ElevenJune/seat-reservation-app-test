@@ -8,7 +8,9 @@ import "./Section.css";
 import { Seat } from "./Seat";
 import { VLayout } from "./Navigation/Layout";
 import { RoundedButton } from "./Widgets/RoundedButton";
+import { Loading } from "./Widgets/Loading";
 import { type SeatType, SeatStatus } from "../types/seat";
+import type { Event } from "@server/schemas/types";
 import {
   type GetEventResponse,
   type LockSeatResponse,
@@ -25,6 +27,8 @@ const appRoutes = {
 
 export const Section: React.FC<SectionProps> = ({}) => {
   const [seats, setSeats] = useState<SeatType[]>([]);
+  const [event, setEvent] = useState<Event>();
+  const [loading, setLoading] = useState<boolean>(true);
   const [notFound, setNotFound] = useState<boolean>(false);
   const [isOverflowing, setIsOverflowing] = useState<boolean>(false);
 
@@ -76,8 +80,12 @@ export const Section: React.FC<SectionProps> = ({}) => {
         const eventData = response.data.event;
         if (!eventData || !eventData.seats) return;
         setSeats(eventData.seats);
+        setEvent(eventData);
+        setTimeout(()=>{setLoading(false);},1000)
+        
       })
       .catch((error) => {
+        setLoading(false);
         if (isAxiosError(error)) {
           const errData = error.response?.data as EventError;
           console.error("Erreur serveur :", errData?.error);
@@ -102,9 +110,11 @@ export const Section: React.FC<SectionProps> = ({}) => {
   }
 
   let component = null;
-  if (notFound || seats.length == 0)
+  if(loading)
+    component = <Loading/>
+  else if (notFound || seats.length == 0)
     component = (
-      <div className="error">
+      <div>
         <h2>Oups...</h2>
         <p>
           {!notFound
@@ -116,6 +126,8 @@ export const Section: React.FC<SectionProps> = ({}) => {
   else
     component = (
       <div className="seating-container" ref={containerRef}>
+        <p>Select your seat</p>
+        <div id="scrollview">
         <TransformWrapper
           centerOnInit={true}
           minScale={isOverflowing ? 0.8 : 1}
@@ -149,11 +161,13 @@ export const Section: React.FC<SectionProps> = ({}) => {
             </div>
           </TransformComponent>
         </TransformWrapper>
+        </div>
       </div>
     );
 
   return (
-    <VLayout justify="center" gap="10px">
+    <VLayout className="page-container" justify="start" gap="10px">
+      <h2 className="mt-header">{event?.title}</h2>
       {component}
       <RoundedButton onClick={() => navigate("/")}>Retour</RoundedButton>
     </VLayout>

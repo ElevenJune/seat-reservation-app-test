@@ -6,8 +6,9 @@ interface RoundedButtonProps {
   marginTop?: string;
   width?: string;
   height?: string;
-  backgroundColor?:string;
-  color?:string
+  backgroundColor?: string;
+  color?: string;
+  id?: string;
 }
 
 export const RoundedButton: React.FC<RoundedButtonProps> = ({
@@ -17,10 +18,12 @@ export const RoundedButton: React.FC<RoundedButtonProps> = ({
   height = "",
   marginTop = "0px",
   backgroundColor = "transparent",
-  color = "var(--text-main)"
+  color = "var(--secondary)",
+  id,
 }) => {
   return (
     <button
+      id={id}
       className="rounded-button"
       onClick={onClick}
       style={

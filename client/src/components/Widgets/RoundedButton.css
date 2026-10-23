@@ -1,5 +1,5 @@
 .rounded-button{
-  border-radius: 10px;
+  border-radius: var(--border-radius);
   width: var(--btn-width,"");
   height: var(--btn-height, "");
   color: var(--btn-color, "black");

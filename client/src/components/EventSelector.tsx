@@ -7,6 +7,7 @@ import { isAxiosError } from "axios";
 
 import "./EventSelector.css";
 import { RoundedButton } from "./Widgets/RoundedButton";
+import { VLayout } from "./Navigation/Layout";
 
 import {
   type GetEventsResponse,
@@ -58,9 +59,9 @@ export const EventSelector: React.FC<EventSelectorProps> = ({}) => {
   const listItems = events.map((event, index) => (
     <div key={event.id} className="whole" onClick={() => selectEvent(index)}>
       <div className="left">
-        <p className="title">
+        <h3 className="title">
           {event.title}
-        </p>
+        </h3>
         <p className="date">{event.date+""}</p>
       </div>
       <div className="right">
@@ -71,9 +72,9 @@ export const EventSelector: React.FC<EventSelectorProps> = ({}) => {
     </div>
   ));
   return (
-    <div>
-      <h1>Events</h1>
+    <VLayout className="page-container">
+      <h1 className="mt-header">Events</h1>
       <ul className="list">{listItems}</ul>
-    </div>
+    </VLayout>
   );
 };

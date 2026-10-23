@@ -1,0 +1,14 @@
+.loading-overlay {
+  /* Animation d'apparition en douceur de 0.3 seconde */
+  opacity: 0;
+  animation: fadeIn 0.3s ease-in-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

@@ -16,8 +16,13 @@
 
 .seating-container {
   width: 100%;
-  height: 60vh;
   overflow: hidden;
   touch-action: none;
-  background-color: antiquewhite;
+
+}
+
+#scrollview{
+    height: 60vh;
+  border: 2px solid var(--secondary);
+  border-radius: var(--border-radius);
 }

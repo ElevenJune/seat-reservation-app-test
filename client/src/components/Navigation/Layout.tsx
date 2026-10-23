@@ -7,13 +7,17 @@ interface LayoutProps {
   justify?: 'start' | 'center' | 'end' | 'between' | 'around';
   gap?: string; // Ex: "10px", "1rem"
   style?: React.CSSProperties;
+  width?: string;
+  className?: string;
 }
 
 // Colonne (VLayout)
-export function VLayout({ children, align = 'center', justify = 'start', gap, style }: LayoutProps) {
+export function VLayout({ children, align = 'center', justify = 'start', gap, style, width = "100%", className }: LayoutProps) {
   return (
     <div
+    className={className}
       style={{
+        width: width,
         display: 'flex',
         flexDirection: 'column',
         alignItems: align,

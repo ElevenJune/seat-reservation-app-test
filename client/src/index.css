@@ -1,15 +1,19 @@
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+  --primary: #9fd3c7;
+  --primary-hover: #44a1a0ff;
+  --secondary: #385170;
+  --text-main: #142d4c;
+  --background:   #ececec;
+
+  --spacing-header-pc: 100px;
+  --spacing-header-mobile: 50px;
+  --spacing-small: 16px;
+  --spacing-medium: 32px;
+
+  --padding-pc: 32px;
+  --padding-mobile: 16px;
+
+  --border-radius: 15px;
 
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
@@ -30,28 +34,8 @@
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
-}
-
 #root {
-  width: 1126px;
+  width: 100vw;
   max-width: 100%;
   margin: 0 auto;
   text-align: center;
@@ -95,17 +79,36 @@ p {
   margin: 0;
 }
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
+.mt-header {
+  margin-top: var(--spacing-header-mobile);
+  @media (min-width: 768px) {
+    margin-top: var(--spacing-header-pc);
+  }
 }
 
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+.page-container {
+  /* 1. Il prend toute la place disponible par défaut */
+  width: 100%;
+  
+  /* 2. On applique les marges de sécurité sur les côtés pour mobile et PC */
+  padding-left: var(--padding-mobile);
+  padding-right: var(--padding-mobile);
+
+  /* 3. LE SECRET D'ELEMENTOR : On fixe une largeur maximale sur PC */
+  max-width: 1000px; /* Ou la largeur max que tu souhaites (ex: 900px) */
+  
+  /* 4. Il se centre automatiquement au milieu de l'écran */
+  margin-left: auto;
+  margin-right: auto;
+
+  box-sizing: border-box;
+
+  @media (min-width: 768px) {
+    padding-left: var(--padding-pc);
+    padding-right: var(--padding-pc);
+  }
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
 }

@@ -4,9 +4,10 @@ import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import apiClient from "../api/axios";
 import { isAxiosError } from "axios";
 
+import { formatDate } from "../utils/utils";
 import "./Section.css";
 import { Seat } from "./Seat";
-import { VLayout } from "./Navigation/Layout";
+import { HLayout, VLayout } from "./Navigation/Layout";
 import { RoundedButton } from "./Widgets/RoundedButton";
 import { Loading } from "./Widgets/Loading";
 import { type SeatType, SeatStatus } from "../types/seat";
@@ -27,7 +28,7 @@ const appRoutes = {
 
 export const Section: React.FC<SectionProps> = ({}) => {
   const [seats, setSeats] = useState<SeatType[]>([]);
-  const [event, setEvent] = useState<Event>();
+  const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [notFound, setNotFound] = useState<boolean>(false);
   const [isOverflowing, setIsOverflowing] = useState<boolean>(false);
@@ -58,19 +59,18 @@ export const Section: React.FC<SectionProps> = ({}) => {
     }, 60000);
   }, [eventId]);
 
-  useEffect(() => {
-    function checkOverflow() {
-      if (containerRef.current && mapRef.current) {
-        setIsOverflowing(
-          containerRef.current.clientWidth < mapRef.current.scrollWidth ||
-            containerRef.current.clientHeight < mapRef.current.scrollHeight,
-        );
-      }
+  function checkOverflow() {
+    if (containerRef.current && mapRef.current) {
+      setIsOverflowing(
+        containerRef.current.clientWidth < mapRef.current.scrollWidth * 0.9 ||
+          containerRef.current.clientHeight < mapRef.current.scrollHeight * 0.9,
+      );
     }
-
+  }
+  useEffect(() => {
     checkOverflow();
     window.addEventListener("resize", checkOverflow);
-  }, [seats]);
+  }, []);
 
   function updateSeats(eventId: string) {
     if (!eventId) return;
@@ -81,8 +81,9 @@ export const Section: React.FC<SectionProps> = ({}) => {
         if (!eventData || !eventData.seats) return;
         setSeats(eventData.seats);
         setEvent(eventData);
-        setTimeout(()=>{setLoading(false);},1000)
-        
+        setTimeout(() => {
+          setLoading(false);
+        }, 1000);
       })
       .catch((error) => {
         setLoading(false);
@@ -110,11 +111,15 @@ export const Section: React.FC<SectionProps> = ({}) => {
   }
 
   let component = null;
-  if(loading)
-    component = <Loading/>
+  if (loading)
+    component = (
+      <div className="filling-component">
+        <Loading />
+      </div>
+    );
   else if (notFound || seats.length == 0)
     component = (
-      <div>
+      <div className="filling-component">
         <h2>Oups...</h2>
         <p>
           {!notFound
@@ -127,14 +132,19 @@ export const Section: React.FC<SectionProps> = ({}) => {
     component = (
       <div className="seating-container" ref={containerRef}>
         <p>Select your seat</p>
-        <div id="scrollview">
         <TransformWrapper
           centerOnInit={true}
           minScale={isOverflowing ? 0.8 : 1}
           maxScale={1.2}
         >
           <TransformComponent
-            wrapperStyle={{ width: "100%", height: "100%" }}
+            wrapperClass="scrollview"
+            wrapperStyle={{
+              width: "100%",
+              height: "100%",
+              maxHeight: "500px",
+              minHeight: "300px",
+            }}
             contentStyle={{
               display: "flex",
               justifyContent: "center",
@@ -161,15 +171,18 @@ export const Section: React.FC<SectionProps> = ({}) => {
             </div>
           </TransformComponent>
         </TransformWrapper>
-        </div>
       </div>
     );
 
   return (
     <VLayout className="page-container" justify="start" gap="10px">
-      <h2 className="mt-header">{event?.title}</h2>
+      <h2 className="mt-header">{event?.title ?? "Event"}</h2>
+      <p>{event?.date ? formatDate(event.date) : ""}</p>
       {component}
-      <RoundedButton onClick={() => navigate("/")}>Retour</RoundedButton>
+      <HLayout gap="20px">
+        <RoundedButton onClick={() => navigate("/")}>Retour</RoundedButton>
+        <RoundedButton onClick={() => navigate("/")}>Ajouter</RoundedButton>
+      </HLayout>
     </VLayout>
   );
 };

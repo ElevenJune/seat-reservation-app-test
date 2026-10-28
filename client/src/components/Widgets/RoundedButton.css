@@ -11,8 +11,12 @@
   margin-top: var("--btn-margin-top", 0);
 }
 
-.rounded-button:hover{
+.rounded-button:hover:enabled{
   transition: background-color 0.5s;
   background-color: var(--primary-hover);
   opacity: 0.8;
+}
+
+.rounded-button:disabled{
+  opacity: 0.4;
 }

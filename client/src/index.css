@@ -5,7 +5,7 @@
   --text-main: #142d4c;
   --background:   #ececec;
 
-  --spacing-header-pc: 100px;
+  --spacing-header-pc: 50px;
   --spacing-header-mobile: 50px;
   --spacing-small: 16px;
   --spacing-medium: 32px;
@@ -93,6 +93,7 @@ p {
   /* 2. On applique les marges de sécurité sur les côtés pour mobile et PC */
   padding-left: var(--padding-mobile);
   padding-right: var(--padding-mobile);
+  padding-bottom: 20px;
 
   /* 3. LE SECRET D'ELEMENTOR : On fixe une largeur maximale sur PC */
   max-width: 1000px; /* Ou la largeur max que tu souhaites (ex: 900px) */

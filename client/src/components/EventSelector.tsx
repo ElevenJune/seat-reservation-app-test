@@ -2,10 +2,11 @@ import React from "react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { Event } from "@server/schemas/types";
+import { AxiosError, isAxiosError } from "axios";
 import apiClient from "../api/axios";
-import { isAxiosError } from "axios";
 
 import "./EventSelector.css";
+import { formatDate } from "../utils/utils";
 import { RoundedButton } from "./Widgets/RoundedButton";
 import { VLayout } from "./Navigation/Layout";
 
@@ -19,6 +20,8 @@ interface EventSelectorProps {}
 export const EventSelector: React.FC<EventSelectorProps> = ({}) => {
   const [_selectedEventIndex, setselectedEventIndex] = useState<number>(-1);
   const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string>("");
   const navigate = useNavigate();
 
   //Startup
@@ -36,45 +39,61 @@ export const EventSelector: React.FC<EventSelectorProps> = ({}) => {
   }
 
   function updateEvents() {
-    console.log("Updating events");
+    setError("");
     apiClient
       .get<GetEventsResponse>("/events")
       .then((response) => {
         const eventsData = response.data.events;
         if (!eventsData) return;
+        eventsData.sort((evtA,evtB)=>{return evtA.date>evtB.date?1:-1;})
         setEvents(eventsData);
-        console.log(eventsData);
+        //console.log(eventsData);
         //selectEvent(eventsData.length > 0 ? 0 : -1);
+        setLoading(false);
       })
-      .catch((error) => {
-        if (isAxiosError(error)) {
-          const errData = error.response?.data as EventError;
-          console.error("Erreur serveur :", errData);
+      .catch((err) => {
+        console.log("Error while calling events");
+        if (isAxiosError(err)) {
+          console.log("Erreur Axios :", err);
+          setError(
+            `Erreur de communication : ${err.message} (code:${err.code})`,
+          );
         } else {
-          console.error("Erreur réseau inattendue", error);
+          let errData = err.response?.message as EventError;
+          setError("Erreur réseau inattendue" + errData.error);
         }
+        console.error(error);
+        setLoading(false);
       });
   }
+
 
   const listItems = events.map((event, index) => (
     <div key={event.id} className="whole" onClick={() => selectEvent(index)}>
       <div className="left">
-        <h3 className="title">
-          {event.title}
-        </h3>
-        <p className="date">{event.date+""}</p>
+        <h3 className="title">{event.title}</h3>
+        <p className="date">{formatDate(event.date)}</p>
       </div>
       <div className="right">
-        <RoundedButton backgroundColor="var(--primary)" onClick={() => selectEvent(index)}>
+        <RoundedButton
+          background-color="var(--primary)"
+          onClick={() => selectEvent(index)}
+        >
           Select
         </RoundedButton>
       </div>
     </div>
   ));
+
+  const content = error ? (
+    <p>{error}</p>
+  ) : (
+    <ul className="list">{listItems}</ul>
+  );
   return (
     <VLayout className="page-container">
       <h1 className="mt-header">Events</h1>
-      <ul className="list">{listItems}</ul>
+      {content}
     </VLayout>
   );
 };

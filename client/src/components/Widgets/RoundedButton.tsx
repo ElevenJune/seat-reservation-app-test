@@ -1,31 +1,32 @@
 import "./RoundedButton.css";
 
+interface RoundedButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  children: React.ReactNode;
+}
+
 interface RoundedButtonProps {
   children: React.ReactNode;
-  onClick: () => void;
+  additionalClassName?: string;
   marginTop?: string;
   width?: string;
   height?: string;
   backgroundColor?: string;
-  color?: string;
-  id?: string;
+  color?: string
 }
 
 export const RoundedButton: React.FC<RoundedButtonProps> = ({
   children,
-  onClick,
+  additionalClassName,
   width = "",
   height = "",
   marginTop = "0px",
   backgroundColor = "transparent",
   color = "var(--secondary)",
-  id,
+  ...rest
 }) => {
   return (
     <button
-      id={id}
-      className="rounded-button"
-      onClick={onClick}
+      className={"rounded-button "+additionalClassName}
       style={
         {
           "--btn-width": width,
@@ -35,6 +36,7 @@ export const RoundedButton: React.FC<RoundedButtonProps> = ({
           "--btn-bg": backgroundColor,
         } as React.CSSProperties
       }
+      {...rest}
     >
       {children}
     </button>

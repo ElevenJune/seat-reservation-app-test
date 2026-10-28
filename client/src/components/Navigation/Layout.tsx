@@ -1,7 +1,7 @@
 import React from 'react';
 
 // Propriétés communes pour nos layouts
-interface LayoutProps {
+interface LayoutProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
   align?: 'start' | 'center' | 'end' | 'stretch';
   justify?: 'start' | 'center' | 'end' | 'between' | 'around';
@@ -12,7 +12,7 @@ interface LayoutProps {
 }
 
 // Colonne (VLayout)
-export function VLayout({ children, align = 'center', justify = 'start', gap, style, width = "100%", className }: LayoutProps) {
+export function VLayout({ children, align = 'center', justify = 'start', gap, style, width = "100%", className, ...rest }: LayoutProps) {
   return (
     <div
     className={className}
@@ -23,9 +23,10 @@ export function VLayout({ children, align = 'center', justify = 'start', gap, st
         alignItems: align,
         justifyContent: justify,
         gap: gap,
-        flex: 1, // Pour que ça prenne toute la place dispo par défaut (comme tes fillHeight)
+        flex: 1,
         ...style,
       }}
+      {...rest}
     >
       {children}
     </div>

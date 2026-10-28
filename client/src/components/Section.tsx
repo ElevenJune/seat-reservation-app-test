@@ -181,7 +181,7 @@ export const Section: React.FC<SectionProps> = ({}) => {
       {component}
       <HLayout gap="20px">
         <RoundedButton onClick={() => navigate("/")}>Retour</RoundedButton>
-        <RoundedButton onClick={() => navigate("/")}>Ajouter</RoundedButton>
+        <RoundedButton variant="secondary" onClick={() => navigate("/")}>Ajouter</RoundedButton>
       </HLayout>
     </VLayout>
   );

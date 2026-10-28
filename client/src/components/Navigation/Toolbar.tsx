@@ -14,10 +14,10 @@ export const Toolbar = () => {
     <div className="nav-back">
       <header className="page-container" style={{paddingBottom:"0px"}}>
         <div className="navbar">
-          <RoundedButton hidden={isHome} id="back" onClick={() => {navigate(-1);}}>
+          <RoundedButton hidden={isHome} variant="ghost" id="back" onClick={() => {navigate(-1);}}>
             {window.history.length>0 ? "Back" : "No"}
           </RoundedButton>
-          <RoundedButton disabled={isHome} onClick={() => { navigate("/");}}>Home</RoundedButton>
+          <RoundedButton disabled={isHome} variant="ghost" onClick={() => { navigate("/");}}>Home</RoundedButton>
         </div>
       </header>
     </div>

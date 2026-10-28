@@ -1,20 +1,51 @@
 .rounded-button{
   border-radius: var(--border-radius);
-  width: var(--btn-width,"");
-  height: var(--btn-height, "");
-  color: var(--btn-color, "black");
-  background-color: var(--btn-bg, "transparent");
-  padding: 20px;
-  padding-top: 10px;
-  padding-bottom: 10px;
-  border: 2px solid var(--btn-color, "black");;
+  padding: 10px 20px;
+  border : 2px solid transparent;
+  transition: background-color 0.3s, opacity 0.3s, color 0.3s, border-color 0.3s;
+  font-weight: 500;
+  font-size: medium;
   margin-top: var("--btn-margin-top", 0);
 }
 
-.rounded-button:hover:enabled{
-  transition: background-color 0.5s;
+.rounded-button.primary {
+  background-color: var(--primary);
+  color: var(--text-main);
+  border-color: var(--primary);
+}
+
+.rounded-button.primary:hover:enabled {
   background-color: var(--primary-hover);
-  opacity: 0.8;
+  color: var(--background);
+}
+
+.rounded-button.secondary {
+  background-color: var(--secondary);
+  color: var(--background);
+  border-color: var(--secondary);
+}
+
+.rounded-button.secondary:hover:enabled {
+  background-color: var(--primary-hover);
+  border-color: var(--primary-hover);
+  color: var(--background);
+}
+
+.rounded-button.ghost{
+  background-color: transparent;
+  color: var(--background, "black");
+  border : 2px solid transparent;
+  border-bottom-color: var(--background, "black");
+}
+
+.rounded-button.ghost:hover:enabled {
+  border-bottom-color: var(--primary-hover);
+  color: var(--primary-hover);
+}
+
+.rounded-button.ghost:hover:active {
+  border-bottom-color: var(--secondary);
+  color: var(--secondary);
 }
 
 .rounded-button:disabled{

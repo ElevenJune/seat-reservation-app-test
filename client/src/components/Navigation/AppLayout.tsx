@@ -1,4 +1,5 @@
 import { Outlet } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 import { Toolbar } from "./Toolbar";
 import { VLayout } from "./Layout";
 
@@ -9,6 +10,7 @@ export function AppLayout() {
       <Toolbar />
       <main style={{ flex: 1, display: "flex", flexDirection: "column", width:"100%" }}>
         <Outlet />
+        <Toaster/>
       </main>
     </VLayout>
   );

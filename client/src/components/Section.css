@@ -30,7 +30,7 @@
   height: 100%;
   max-height: 500px;
   flex-grow: 1;
-  border: 2px solid var(--secondary);
+  border: 2px solid var(--primary);
   border-radius: var(--border-radius);
     overflow: hidden;
   touch-action: none;
@@ -52,4 +52,10 @@
   align-items: center;
   justify-content: center;
   animation: fadeIn 0.3s ease-in-out forwards;
+}
+
+.map.limit-reached .seat:not(.locked) {
+  opacity: 0.3;
+  cursor: not-allowed;
+  pointer-events: none;
 }

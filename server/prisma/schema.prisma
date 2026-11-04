@@ -38,6 +38,7 @@ model Seat {
   price Float
   status SeatStatus @default(AVAILABLE)
   lockedAt DateTime?
+  lockedBy String @default("")
   event     Event      @relation(fields: [eventId], references: [id])
   updatedAt DateTime @updatedAt
 }

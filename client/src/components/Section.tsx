@@ -4,7 +4,7 @@ import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import apiClient from "../api/axios";
 import { isAxiosError } from "axios";
 
-import { formatDate } from "../utils/utils";
+import { formatDate, getOrCreateSessionId } from "../utils/utils";
 import "./Section.css";
 import { Seat } from "./Seat";
 import { HLayout, VLayout } from "./Navigation/Layout";
@@ -24,11 +24,15 @@ const appRoutes = {
   events: () => "/events",
   event: (eventId: string) => `/events/${eventId}`,
   lockSeat: (seatId: string, action: string) => `/seats/${seatId}/${action}`,
+  bookSeats: () => "/seats/book",
 };
 
 export const Section: React.FC<SectionProps> = ({}) => {
   const [seats, setSeats] = useState<SeatType[]>([]);
   const [event, setEvent] = useState<Event | null>(null);
+  const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
+  const isLimitReached = selectedSeats.length >= 5;
+
   const [loading, setLoading] = useState<boolean>(true);
   const [notFound, setNotFound] = useState<boolean>(false);
   const [isOverflowing, setIsOverflowing] = useState<boolean>(false);
@@ -75,11 +79,21 @@ export const Section: React.FC<SectionProps> = ({}) => {
   function updateSeats(eventId: string) {
     if (!eventId) return;
     apiClient
-      .get<GetEventResponse>(appRoutes.event(eventId))
+      .get<GetEventResponse>(appRoutes.event(eventId), { skipToast: true } as any)
       .then((response) => {
         const eventData = response.data.event;
         if (!eventData || !eventData.seats) return;
         setSeats(eventData.seats);
+        let lockedSeats = eventData.seats
+          .filter(
+            (seat) =>
+              seat.lockedBy === getOrCreateSessionId() &&
+              seat.eventId === eventId &&
+              seat.status === SeatStatus.LOCKED,
+          )
+          .map((seat) => seat.id);
+        console.log("Locked seats", lockedSeats);
+        setSelectedSeats(lockedSeats);
         setEvent(eventData);
         setTimeout(() => {
           setLoading(false);
@@ -87,12 +101,10 @@ export const Section: React.FC<SectionProps> = ({}) => {
       })
       .catch((error) => {
         setLoading(false);
-        if (isAxiosError(error)) {
+        if (error.response?.status === 404){
           const errData = error.response?.data as EventError;
           console.error("Erreur serveur :", errData?.error);
           setNotFound(true);
-        } else {
-          console.error("Erreur réseau inattendue", error);
         }
       });
   }
@@ -102,11 +114,27 @@ export const Section: React.FC<SectionProps> = ({}) => {
     const selectedSeat = seats.find((seat) => seat.id === seatId);
     const action =
       selectedSeat?.status === SeatStatus.LOCKED ? "unlock" : "lock";
-    if (selectedSeat?.status === SeatStatus.BOOKED) return;
+    if (
+      selectedSeat?.status === SeatStatus.BOOKED ||
+      (action == "lock" && isLimitReached)
+    )
+      return;
     apiClient
-      .post<LockSeatResponse>(appRoutes.lockSeat(seatId, action))
+      .post<LockSeatResponse>(appRoutes.lockSeat(seatId, action), {
+        sessionId: getOrCreateSessionId(),
+      })
       .then((response) => {
         if (response.status === 200) updateSeats(eventId);
+      });
+  }
+
+  function bookSeats(sessionId: string) {
+    if (!eventId) return;
+    apiClient
+      .post<LockSeatResponse>(appRoutes.bookSeats(), { sessionId })
+      .then((response) => {
+        if (response.status === 200) updateSeats(eventId);
+        setSelectedSeats([]);
       });
   }
 
@@ -151,7 +179,10 @@ export const Section: React.FC<SectionProps> = ({}) => {
               alignItems: "center",
             }}
           >
-            <div className="map" ref={mapRef}>
+            <div
+              className={`map ${isLimitReached ? "limit-reached" : ""}`}
+              ref={mapRef}
+            >
               {rows.map((row) => (
                 <div className="row" key={row}>
                   {row}
@@ -163,6 +194,7 @@ export const Section: React.FC<SectionProps> = ({}) => {
                         number={seat.number}
                         status={seat.status}
                         key={seat.id}
+                        yours={seat.lockedBy===getOrCreateSessionId()}
                         onClick={() => toggleSeat(seat.id)}
                       />
                     ))}
@@ -171,6 +203,13 @@ export const Section: React.FC<SectionProps> = ({}) => {
             </div>
           </TransformComponent>
         </TransformWrapper>
+        {isLimitReached ? (
+          <div className="alert-banner">
+            Vous avez atteint la limite maximale de 5 sièges.
+          </div>
+        ) : (
+          <div>Sièges sélectionnés : {selectedSeats.length}</div>
+        )}
       </div>
     );
 
@@ -181,7 +220,13 @@ export const Section: React.FC<SectionProps> = ({}) => {
       {component}
       <HLayout gap="20px">
         <RoundedButton onClick={() => navigate("/")}>Retour</RoundedButton>
-        <RoundedButton variant="secondary" onClick={() => navigate("/")}>Ajouter</RoundedButton>
+        <RoundedButton
+          disabled={selectedSeats.length == 0}
+          variant="secondary"
+          onClick={() => bookSeats(getOrCreateSessionId())}
+        >
+          Ajouter
+        </RoundedButton>
       </HLayout>
     </VLayout>
   );

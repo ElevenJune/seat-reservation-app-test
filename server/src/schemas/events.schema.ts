@@ -1,5 +1,6 @@
-import { boolean, number, z } from "zod";
+import { boolean, number, properties, z } from "zod";
 import { EventSchema, SeatSchema } from "../generated/zod";
+import { required } from "zod/mini";
 
 const optionalBoolSchema = (defaultValue = false) =>
   z
@@ -22,7 +23,6 @@ export const EventErrorSchema = z.object({
 });
 
 export type EventError = z.infer<typeof EventErrorSchema>;
-
 
 // ===== Schemas
 export const userSectionSchema = {
@@ -65,16 +65,31 @@ export const eventsSchema = {
 };
 export type GetEventsResponse = z.infer<(typeof eventsSchema.response)[200]>;
 
-
 export const lockSeatSchema = {
-  // Paramètres d'URL (:row)
   params: z.object({
-    seatId: z.string()
+    seatId: z.string(),
+  }),
+  body: z.object({
+    sessionId : z.string()
   }),
   response: {
     200: z.object({
       seatId: z.string(),
       locked: z.boolean(),
+    }),
+    "4xx": EventErrorSchema,
+  },
+};
+
+export type LockSeatResponse = z.infer<(typeof lockSeatSchema.response)[200]>;
+
+export const bookSeatsSchema = {
+  body: z.object({
+    sessionId : z.string()
+  }),
+  response: {
+    200: z.object({
+      sessionId: z.string()
     }),
     "4xx": z.object({
       error: z.string(),
@@ -82,4 +97,4 @@ export const lockSeatSchema = {
   },
 };
 
-export type LockSeatResponse = z.infer<(typeof lockSeatSchema.response)[200]>;
+export type BookSeatsResponse = z.infer<(typeof bookSeatsSchema.response)[200]>;

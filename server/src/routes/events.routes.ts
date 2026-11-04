@@ -4,13 +4,17 @@ import { prisma, SeatStatus } from "../lib/prisma";
 import {
   releaseExpiredSeats,
   lockSeat,
+  LockSeatError,
   unlockSeat,
+  bookSeat
 } from "../services/seatService";
 import {
   userSectionSchema,
   eventSchema,
   eventsSchema,
-  lockSeatSchema
+  lockSeatSchema,
+  bookSeatsSchema,
+  EventError
 } from "../schemas/events.schema";
 import { API_PATHS } from "../constants/routes";
 
@@ -67,14 +71,32 @@ export async function eventRoutes(app: FastifyInstance) {
     { schema: lockSeatSchema },
     async (request, reply) => {
       const { seatId } = request.params;
-      const result = await lockSeat(seatId);
-      if (result.count === 0) {
-        return reply
-          .status(404)
-          .send({ error: "Seat already locked or not found" });
-      }
-      return reply.status(200).send({seatId,locked:true});
-      //return { success: true, message: `Seat ${row}${number} locked` };
+      const { sessionId } = request.body;
+      const result = await lockSeat(seatId,sessionId);
+
+if (!result.result) {
+  let code = 400;
+  let message = "Unknown error";
+
+  switch (result.errCode) {
+    case LockSeatError.QUOTA_REACHED:
+      code = 412;
+      message = "Quota of 5 seats by event reached";
+      break;
+    case LockSeatError.NO_EVENT:
+      code = 405;
+      message = "This seat does not have a parent event";
+      break;
+    case LockSeatError.UPDATE_FAILED:
+      code = 404;
+      message = "Seat already locked or not found";
+      break;
+  }
+
+  return reply.status(code).send({ statusCode: code, error: message });
+}
+
+return reply.status(200).send({ seatId, locked: true });
     },
   );
 
@@ -91,6 +113,22 @@ export async function eventRoutes(app: FastifyInstance) {
       }
 
       return reply.status(200).send({seatId,locked:false});
+    },
+  );
+
+  fastify.post(
+    API_PATHS.BOOK_SEATS,
+    { schema: bookSeatsSchema },
+    async (request, reply) => {
+      const { sessionId } = request.body;
+      const result = await bookSeat(sessionId);
+      if (result.count === 0) {
+        return reply
+          .status(404)
+          .send({ error: "No seat locked by that id" });
+      }
+      return reply.status(200).send({sessionId});
+      //return { success: true, message: `Seat ${row}${number} locked` };
     },
   );
 }

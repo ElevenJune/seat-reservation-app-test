@@ -20,7 +20,7 @@ interface EventSelectorProps {}
 export const EventSelector: React.FC<EventSelectorProps> = ({}) => {
   const [_selectedEventIndex, setselectedEventIndex] = useState<number>(-1);
   const [events, setEvents] = useState<Event[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [_loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
   const navigate = useNavigate();
 
@@ -47,22 +47,9 @@ export const EventSelector: React.FC<EventSelectorProps> = ({}) => {
         if (!eventsData) return;
         eventsData.sort((evtA,evtB)=>{return evtA.date>evtB.date?1:-1;})
         setEvents(eventsData);
-        //console.log(eventsData);
-        //selectEvent(eventsData.length > 0 ? 0 : -1);
         setLoading(false);
       })
-      .catch((err) => {
-        console.log("Error while calling events");
-        if (isAxiosError(err)) {
-          console.log("Erreur Axios :", err);
-          setError(
-            `Erreur de communication : ${err.message} (code:${err.code})`,
-          );
-        } else {
-          let errData = err.response?.message as EventError;
-          setError("Erreur réseau inattendue" + errData.error);
-        }
-        console.error(error);
+      .catch((_err) => {
         setLoading(false);
       });
   }

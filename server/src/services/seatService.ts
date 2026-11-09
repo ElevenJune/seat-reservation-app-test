@@ -40,7 +40,7 @@ export async function lockSeat(
       NOT : {status:SeatStatus.AVAILABLE},
     },
   });
-  console.log("===> number of seats from", sessionId, seatsOfThisUser.length, seatsOfThisUser);
+  //console.log("===> number of seats from", sessionId, seatsOfThisUser.length, seatsOfThisUser);
   if (seatsOfThisUser.length >=5 )
     return Promise.resolve({ result: false, errCode: LockSeatError.QUOTA_REACHED });
   const p = await prisma.seat.updateMany({
@@ -54,7 +54,7 @@ export async function lockSeat(
   return { result: p.count > 0, errCode: LockSeatError.UPDATE_FAILED };
 }
 
-export async function bookSeat(sessionId: string) {
+export async function bookSeats(sessionId: string) {
   return await prisma.seat.updateMany({
     where: { lockedBy: sessionId, status: SeatStatus.LOCKED },
     data: { status: SeatStatus.BOOKED, lockedAt: null, lockedBy: sessionId },
@@ -65,5 +65,12 @@ export async function unlockSeat(id: string) {
   return await prisma.seat.updateMany({
     where: { id, status: SeatStatus.LOCKED },
     data: { status: SeatStatus.AVAILABLE, lockedAt: null, lockedBy: "" },
+  });
+}
+
+export async function getUserCart(userId: string){
+  return await prisma.seat.findMany({
+    where: { status : SeatStatus.LOCKED, lockedBy: userId},
+    include: { event : true }
   });
 }

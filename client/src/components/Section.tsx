@@ -2,9 +2,8 @@ import { useMemo, useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import apiClient from "../api/axios";
-import { isAxiosError } from "axios";
 
-import { formatDate, getOrCreateSessionId } from "../utils/utils";
+import { formatDate, getOrCreateSessionId, appRoutes } from "../utils/utils";
 import "./Section.css";
 import { Seat } from "./Seat";
 import { HLayout, VLayout } from "./Navigation/Layout";
@@ -19,13 +18,6 @@ import {
 } from "@server/constants/types";
 
 interface SectionProps {}
-
-const appRoutes = {
-  events: () => "/events",
-  event: (eventId: string) => `/events/${eventId}`,
-  lockSeat: (seatId: string, action: string) => `/seats/${seatId}/${action}`,
-  bookSeats: () => "/seats/book",
-};
 
 export const Section: React.FC<SectionProps> = ({}) => {
   const [seats, setSeats] = useState<SeatType[]>([]);
@@ -43,6 +35,7 @@ export const Section: React.FC<SectionProps> = ({}) => {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<HTMLDivElement>(null);
+  const timerRef = useRef<number>(null)
 
   const rows = useMemo(() => {
     return seats.reduce((acc: string[], seat) => {
@@ -58,9 +51,13 @@ export const Section: React.FC<SectionProps> = ({}) => {
     }
     updateSeats(eventId);
     console.log("selectedEventIndex changed", eventId);
-    setInterval(() => {
+    timerRef.current = setInterval(() => {
       updateSeats(eventId);
     }, 60000);
+    return () => {
+      if(timerRef.current)
+        clearInterval(timerRef.current);
+    };
   }, [eventId]);
 
   function checkOverflow() {
@@ -128,15 +125,7 @@ export const Section: React.FC<SectionProps> = ({}) => {
       });
   }
 
-  function bookSeats(sessionId: string) {
-    if (!eventId) return;
-    apiClient
-      .post<LockSeatResponse>(appRoutes.bookSeats(), { sessionId })
-      .then((response) => {
-        if (response.status === 200) updateSeats(eventId);
-        setSelectedSeats([]);
-      });
-  }
+
 
   let component = null;
   if (loading)
@@ -221,11 +210,11 @@ export const Section: React.FC<SectionProps> = ({}) => {
       <HLayout gap="20px">
         <RoundedButton onClick={() => navigate("/")}>Retour</RoundedButton>
         <RoundedButton
-          disabled={selectedSeats.length == 0}
+          disabled={selectedSeats.length == -1}
           variant="secondary"
-          onClick={() => bookSeats(getOrCreateSessionId())}
+          onClick={() => {navigate("/cart")}}
         >
-          Ajouter
+          Continuer
         </RoundedButton>
       </HLayout>
     </VLayout>

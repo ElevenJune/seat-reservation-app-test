@@ -3,5 +3,6 @@ export const API_PATHS = {
   EVENT_BY_ID: '/api/events/:id',
   LOCK_SEAT: '/api/seats/:seatId/lock',
   UNLOCK_SEAT: '/api/seats/:seatId/unlock',
-  BOOK_SEATS: '/api/seats/book'
+  BOOK_SEATS: '/api/seats/book',
+  CART: '/api/cart'
 } as const;

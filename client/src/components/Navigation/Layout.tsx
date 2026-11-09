@@ -34,7 +34,7 @@ export function VLayout({ children, align = 'center', justify = 'start', gap, st
 }
 
 // Ligne (HLayout)
-export function HLayout({ children, align = 'center', justify = 'start', gap, style }: LayoutProps) {
+export function HLayout({ children, align = 'center', justify = 'start', gap, style, ...rest }: LayoutProps) {
   return (
     <div
       style={{
@@ -45,6 +45,7 @@ export function HLayout({ children, align = 'center', justify = 'start', gap, st
         gap: gap,
         ...style,
       }}
+      {...rest}
     >
       {children}
     </div>

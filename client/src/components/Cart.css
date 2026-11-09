@@ -1,0 +1,36 @@
+.cartItem {
+    border: 2px solid var(--secondary);
+    border-radius: var(--border-radius);
+    width : 100%;
+    max-width: 500px;
+    padding: 5px 10px;
+}
+
+.cartItem > * {
+    align-content: center;
+}
+
+.eventTitle {
+    width : 25%;
+    text-align: start;
+    color: var(--secondary);
+}
+
+.eventTitle:hover {
+    color:var(--primary-hover)
+}
+
+.eventSeat {
+    flex-grow: 1;
+    text-align: start;
+}
+
+.removeFromCartButton{
+    height: min-content;
+    width:fit-content;
+    padding: 6px 12px;
+}
+
+.bookButton{
+    margin-top: var(--spacing-medium);
+}

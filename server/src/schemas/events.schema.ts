@@ -98,3 +98,23 @@ export const bookSeatsSchema = {
 };
 
 export type BookSeatsResponse = z.infer<(typeof bookSeatsSchema.response)[200]>;
+
+export const CartItemSchema = SeatSchema.extend({
+  event: EventSchema
+})
+
+export const getUserCartSchema = {
+  headers: z.object({
+    'x-session-id' : z.string()
+  }),
+  response: {
+    200: z.object({
+      lockedSeats: z.array(CartItemSchema),
+    }),
+    "4xx": z.object({
+      error: z.string(),
+    }),
+  },
+};
+
+export type GetUserCartResponse = z.infer<(typeof getUserCartSchema.response)[200]>;

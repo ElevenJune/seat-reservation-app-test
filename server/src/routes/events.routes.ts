@@ -12,7 +12,6 @@ import {
   freeSeat,
 } from "../services/seatService";
 import {
-  userSectionSchema,
   eventSchema,
   eventsSchema,
   lockSeatSchema,
@@ -31,7 +30,7 @@ export async function eventRoutes(app: FastifyInstance) {
   });
 
   fastify.get(
-    "/api/events/:id",
+    API_PATHS.EVENT_BY_ID,
     { schema: eventSchema },
     async (request, reply) => {
       const { id } = request.params;
@@ -51,28 +50,12 @@ export async function eventRoutes(app: FastifyInstance) {
   );
 
   fastify.get(
-    "/api/events",
+    API_PATHS.EVENTS,
     { schema: eventsSchema },
     async (request, reply) => {
       const events = await prisma.event.findMany();
       if (events) return { events };
       else return reply.status(404).send({ error: "No event found " });
-    },
-  );
-
-  fastify.get(
-    "/api/seats/:row",
-    { schema: userSectionSchema },
-    async (request) => {
-      // row provient de params, asc provient de query
-      const { row } = request.params;
-      const { asc } = request.query;
-
-      const seats = await prisma.seat.findMany({
-        orderBy: asc.valueOf() ? [{ number: "asc" }] : [{ number: "desc" }],
-      });
-      const filtered = seats.filter((seat) => seat.row === row);
-      return { list: filtered, order: asc };
     },
   );
 
@@ -118,7 +101,7 @@ export async function eventRoutes(app: FastifyInstance) {
             message = "Quota of 5 seats by event reached";
             break;
           case LockSeatError.NO_EVENT:
-            code = 405;
+            code = 400;
             message = "This seat does not have a parent event";
             break;
           case LockSeatError.UPDATE_FAILED:

@@ -12,6 +12,7 @@ export async function releaseExpiredSeats() {
     data: {
       status: SeatStatus.AVAILABLE,
       lockedAt: null,
+      lockedBy: "",
     },
   });
 
@@ -61,16 +62,18 @@ export async function bookSeats(sessionId: string) {
   });
 }
 
-export async function unlockSeat(id: string) {
+// Filtering on lockedBy in the where clause makes the ownership check atomic:
+// if the seat does not belong to this session, count is 0.
+export async function unlockSeat(id: string, sessionId: string) {
   return await prisma.seat.updateMany({
-    where: { id, status: SeatStatus.LOCKED },
+    where: { id, status: SeatStatus.LOCKED, lockedBy: sessionId },
     data: { status: SeatStatus.AVAILABLE, lockedAt: null, lockedBy: "" },
   });
 }
 
-export async function freeSeat(id: string) {
+export async function freeSeat(id: string, sessionId: string) {
   return await prisma.seat.updateMany({
-    where: { id, status: SeatStatus.BOOKED },
+    where: { id, status: SeatStatus.BOOKED, lockedBy: sessionId },
     data: { status: SeatStatus.AVAILABLE, lockedAt: null, lockedBy: "" },
   });
 }

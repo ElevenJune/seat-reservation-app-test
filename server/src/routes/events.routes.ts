@@ -19,7 +19,7 @@ import {
   EventError,
   getUserCartSchema,
 } from "../schemas/events.schema";
-import { API_PATHS } from "../constants/routes";
+import { API_PATHS, SESSION_HEADER } from "../constants/routes";
 
 export async function eventRoutes(app: FastifyInstance) {
   const fastify = app.withTypeProvider<ZodTypeProvider>();
@@ -63,8 +63,7 @@ export async function eventRoutes(app: FastifyInstance) {
     API_PATHS.CART,
     { schema: getUserCartSchema },
     async (request, reply) => {
-      const sessionId = request.headers["x-session-id"];
-      //const sessionId = "uiu"
+      const sessionId = request.headers[SESSION_HEADER];
       const seats = await getUserCart(sessionId);
       if (seats) return reply.status(200).send({ lockedSeats: seats });
       else return reply.status(404).send({ error: "User does not exists" });
@@ -75,8 +74,7 @@ export async function eventRoutes(app: FastifyInstance) {
     API_PATHS.BOOKED_SEATS,
     { schema: getUserCartSchema },
     async (request, reply) => {
-      const sessionId = request.headers["x-session-id"];
-      //const sessionId = "uiu"
+      const sessionId = request.headers[SESSION_HEADER];
       const seats = await getUserBookedSeats(sessionId);
       if (seats) return reply.status(200).send({ lockedSeats: seats });
       else return reply.status(404).send({ error: "User does not exists" });
@@ -88,7 +86,7 @@ export async function eventRoutes(app: FastifyInstance) {
     { schema: lockSeatSchema },
     async (request, reply) => {
       const { seatId } = request.params;
-      const { sessionId } = request.body;
+      const sessionId = request.headers[SESSION_HEADER];
       const result = await lockSeat(seatId, sessionId);
 
       if (!result.result) {
@@ -122,11 +120,12 @@ export async function eventRoutes(app: FastifyInstance) {
     { schema: lockSeatSchema },
     async (request, reply) => {
       const { seatId } = request.params;
-      const result = await unlockSeat(seatId);
+      const sessionId = request.headers[SESSION_HEADER];
+      const result = await unlockSeat(seatId, sessionId);
       if (result.count === 0) {
         return reply
           .status(404)
-          .send({ error: "Seat already unlocked or not found" });
+          .send({ error: "Seat not locked by you or not found" });
       }
 
       return reply.status(200).send({ seatId, locked: false });
@@ -138,11 +137,12 @@ export async function eventRoutes(app: FastifyInstance) {
     { schema: lockSeatSchema },
     async (request, reply) => {
       const { seatId } = request.params;
-      const result = await freeSeat(seatId);
+      const sessionId = request.headers[SESSION_HEADER];
+      const result = await freeSeat(seatId, sessionId);
       if (result.count === 0) {
         return reply
           .status(404)
-          .send({ error: "Seat already freed or not found" });
+          .send({ error: "Seat not booked by you or not found" });
       }
 
       return reply.status(200).send({ seatId, locked: false });
@@ -153,7 +153,7 @@ export async function eventRoutes(app: FastifyInstance) {
     API_PATHS.BOOK_SEATS,
     { schema: bookSeatsSchema },
     async (request, reply) => {
-      const { sessionId } = request.body;
+      const sessionId = request.headers[SESSION_HEADER];
       const result = await bookSeats(sessionId);
       if (result.count === 0) {
         return reply.status(404).send({ error: "No seat locked by that id" });

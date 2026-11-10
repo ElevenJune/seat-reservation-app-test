@@ -1,6 +1,7 @@
 import { boolean, number, properties, z } from "zod";
 import { EventSchema, SeatSchema } from "../generated/zod";
 import { required } from "zod/mini";
+import { SESSION_HEADER } from "../constants/routes";
 
 const optionalBoolSchema = (defaultValue = false) =>
   z
@@ -23,6 +24,10 @@ export const EventErrorSchema = z.object({
 });
 
 export type EventError = z.infer<typeof EventErrorSchema>;
+
+export const sessionHeaders = z.object({
+  [SESSION_HEADER]: z.string().min(1),
+});
 
 // ===== Schemas
 export const userSectionSchema = {
@@ -69,9 +74,7 @@ export const lockSeatSchema = {
   params: z.object({
     seatId: z.string(),
   }),
-  body: z.object({
-    sessionId : z.string()
-  }),
+  headers: sessionHeaders,
   response: {
     200: z.object({
       seatId: z.string(),
@@ -84,9 +87,7 @@ export const lockSeatSchema = {
 export type LockSeatResponse = z.infer<(typeof lockSeatSchema.response)[200]>;
 
 export const bookSeatsSchema = {
-  body: z.object({
-    sessionId : z.string()
-  }),
+  headers: sessionHeaders,
   response: {
     200: z.object({
       sessionId: z.string()
@@ -104,9 +105,7 @@ export const SeatWithEventSchema = SeatSchema.extend({
 })
 
 export const getUserCartSchema = {
-  headers: z.object({
-    'x-session-id' : z.string()
-  }),
+  headers: sessionHeaders,
   response: {
     200: z.object({
       lockedSeats: z.array(SeatWithEventSchema),

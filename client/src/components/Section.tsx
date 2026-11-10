@@ -115,9 +115,7 @@ export const Section: React.FC<SectionProps> = ({}) => {
     )
       return;
     apiClient
-      .post<LockSeatResponse>(appRoutes.lockSeat(seatId, action), {
-        sessionId: getOrCreateSessionId(),
-      })
+      .post<LockSeatResponse>(appRoutes.lockSeat(seatId, action))
       .then((response) => {
         if (response.status === 200) updateSeats(eventId);
       });

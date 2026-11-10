@@ -20,10 +20,18 @@ import {
 interface SectionProps {}
 
 export const Section: React.FC<SectionProps> = ({}) => {
+  const { id: eventId } = useParams<{ id: string }>();
+
   const [seats, setSeats] = useState<SeatType[]>([]);
   const [event, setEvent] = useState<Event | null>(null);
-  const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
-  const isLimitReached = selectedSeats.length >= 5;
+  const userSeats = useMemo(()=> seats.filter(
+    (s) =>
+      s.lockedBy === getOrCreateSessionId() &&
+      s.eventId === eventId &&
+      (s.status === SeatStatus.BOOKED || s.status == SeatStatus.LOCKED),
+  ),[seats,eventId]);
+  const numberOfSelectedSeats = userSeats.filter((s)=>s.status == SeatStatus.LOCKED).length;
+  const isLimitReached = userSeats.length >= 5;
 
   const [loading, setLoading] = useState<boolean>(true);
   const [notFound, setNotFound] = useState<boolean>(false);
@@ -31,11 +39,9 @@ export const Section: React.FC<SectionProps> = ({}) => {
 
   const navigate = useNavigate();
 
-  const { id: eventId } = useParams<{ id: string }>();
-
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<HTMLDivElement>(null);
-  const timerRef = useRef<number>(null)
+  const timerRef = useRef<number>(null);
 
   const rows = useMemo(() => {
     return seats.reduce((acc: string[], seat) => {
@@ -50,13 +56,12 @@ export const Section: React.FC<SectionProps> = ({}) => {
       return;
     }
     updateSeats(eventId);
-    console.log("selectedEventIndex changed", eventId);
+
     timerRef.current = setInterval(() => {
       updateSeats(eventId);
     }, 60000);
     return () => {
-      if(timerRef.current)
-        clearInterval(timerRef.current);
+      if (timerRef.current) clearInterval(timerRef.current);
     };
   }, [eventId]);
 
@@ -76,21 +81,14 @@ export const Section: React.FC<SectionProps> = ({}) => {
   function updateSeats(eventId: string) {
     if (!eventId) return;
     apiClient
-      .get<GetEventResponse>(appRoutes.event(eventId), { skipToast: true } as any)
+      .get<GetEventResponse>(appRoutes.event(eventId), {
+        skipToast: true,
+      } as any)
       .then((response) => {
         const eventData = response.data.event;
         if (!eventData || !eventData.seats) return;
         setSeats(eventData.seats);
-        let lockedSeats = eventData.seats
-          .filter(
-            (seat) =>
-              seat.lockedBy === getOrCreateSessionId() &&
-              seat.eventId === eventId &&
-              seat.status === SeatStatus.LOCKED,
-          )
-          .map((seat) => seat.id);
-        console.log("Locked seats", lockedSeats);
-        setSelectedSeats(lockedSeats);
+
         setEvent(eventData);
         setTimeout(() => {
           setLoading(false);
@@ -98,7 +96,7 @@ export const Section: React.FC<SectionProps> = ({}) => {
       })
       .catch((error) => {
         setLoading(false);
-        if (error.response?.status === 404){
+        if (error.response?.status === 404) {
           const errData = error.response?.data as EventError;
           console.error("Erreur serveur :", errData?.error);
           setNotFound(true);
@@ -124,8 +122,6 @@ export const Section: React.FC<SectionProps> = ({}) => {
         if (response.status === 200) updateSeats(eventId);
       });
   }
-
-
 
   let component = null;
   if (loading)
@@ -183,7 +179,7 @@ export const Section: React.FC<SectionProps> = ({}) => {
                         number={seat.number}
                         status={seat.status}
                         key={seat.id}
-                        yours={seat.lockedBy===getOrCreateSessionId()}
+                        yours={seat.lockedBy === getOrCreateSessionId()}
                         onClick={() => toggleSeat(seat.id)}
                       />
                     ))}
@@ -197,7 +193,7 @@ export const Section: React.FC<SectionProps> = ({}) => {
             Vous avez atteint la limite maximale de 5 sièges.
           </div>
         ) : (
-          <div>Sièges sélectionnés : {selectedSeats.length}</div>
+          <p>Sièges réservables : {numberOfSelectedSeats}/{5-(userSeats.length-numberOfSelectedSeats)}, Sièges réservés : {userSeats.length-numberOfSelectedSeats}/5</p>
         )}
       </div>
     );
@@ -210,9 +206,11 @@ export const Section: React.FC<SectionProps> = ({}) => {
       <HLayout gap="20px">
         <RoundedButton onClick={() => navigate("/")}>Retour</RoundedButton>
         <RoundedButton
-          disabled={selectedSeats.length == -1}
+          disabled={numberOfSelectedSeats == 0}
           variant="secondary"
-          onClick={() => {navigate("/cart")}}
+          onClick={() => {
+            navigate("/cart");
+          }}
         >
           Continuer
         </RoundedButton>

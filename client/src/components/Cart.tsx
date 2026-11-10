@@ -15,18 +15,21 @@ import "./Cart.css"
 
 export const Cart: React.FC<{}> = () => {
   const [cartContent, setCartContent] = useState<GetUserCartResponse>();
-  let isEmpty = !(cartContent && cartContent.lockedSeats.length>0);
+  const [bookedSeats, setBookedSeats] = useState<GetUserCartResponse>();
+  let isCartEmpty = !(cartContent && cartContent.lockedSeats.length>0);
+  let isBookedEmpty = !(bookedSeats && bookedSeats.lockedSeats.length>0);
 
   let navigate = useNavigate();
 
   useEffect(() => {
     getUserCart();
+    getBookedSeats();
   }, []);
 
   function getUserCart() {
     const sessionId = getOrCreateSessionId();
     apiClient
-      .get<GetUserCartResponse>("cart", {
+      .get<GetUserCartResponse>(appRoutes.getCart(), {
         headers: { "x-session-id": sessionId },
       })
       .then((response) => {
@@ -34,11 +37,25 @@ export const Cart: React.FC<{}> = () => {
       });
   }
 
+  function getBookedSeats() {
+    const sessionId = getOrCreateSessionId();
+    apiClient
+      .get<GetUserCartResponse>(appRoutes.getBookedSeats(), {
+        headers: { "x-session-id": sessionId },
+      })
+      .then((response) => {
+        setBookedSeats(response.data)
+      });
+  }
+
     function bookSeats(sessionId: string) {
       apiClient
         .post<LockSeatResponse>(appRoutes.bookSeats(), { sessionId })
         .then((response) => {
-          if (response.status === 200) getUserCart();
+          if (response.status === 200){
+            getUserCart();
+            getBookedSeats();
+          }
         });
     }
 
@@ -52,6 +69,16 @@ export const Cart: React.FC<{}> = () => {
       });
     }
 
+    function cancelSeat(seatId:string){
+      apiClient
+      .post<LockSeatResponse>(appRoutes.lockSeat(seatId, "free"), {
+        sessionId: getOrCreateSessionId(),
+      })
+      .then((response) => {
+        if (response.status === 200) getBookedSeats();
+      });
+    }
+
   let list = cartContent?.lockedSeats.map((seat) => (
     <HLayout className="cartItem" align='stretch' justify="end" gap="20px" key={seat.id}>
       <a className="eventTitle" onClick={()=>{navigate(`/event/${seat.eventId}`)}}><b>{seat.event.title}</b></a>
@@ -61,13 +88,25 @@ export const Cart: React.FC<{}> = () => {
     </HLayout>
   ));
 
-  let component = !isEmpty ? list : (<i>Cart is empty</i>)
+  let booked = bookedSeats?.lockedSeats.map((seat) => (
+    <HLayout className="cartItem" align='stretch' justify="end" gap="20px" key={seat.id}>
+      <a className="eventTitle" onClick={()=>{navigate(`/event/${seat.eventId}`)}}><b>{seat.event.title}</b></a>
+      <p className="eventSeat">{`${seat.row}${seat.number}`}</p>
+      <p className="eventPrice">{seat.price+"€"}</p>
+      <RoundedButton variant="secondary" additionalClassName="removeFromCartButton" onClick={()=>{cancelSeat(seat.id)}}>Cancel</RoundedButton>
+    </HLayout>
+  ));
+
+  let component = !isCartEmpty ? list : (<i>Cart is empty</i>)
+  let component2 = !isBookedEmpty ? booked : (<i>You don't have any booked seat</i>)
 
   return (
     <VLayout className="page-container" justify="start" gap="10px">
         <h2 className="mt-header">Cart</h2>
         {component}
-        <RoundedButton hidden={isEmpty} additionalClassName="bookButton" onClick={()=>{bookSeats(getOrCreateSessionId())}} >Réserver</RoundedButton>
+        <RoundedButton hidden={isCartEmpty} additionalClassName="bookButton" onClick={()=>{bookSeats(getOrCreateSessionId())}} >Réserver</RoundedButton>
+        <h2 className="mt-header">Your booked Seats</h2>
+        {component2}
     </VLayout>
   )
 };

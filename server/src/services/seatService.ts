@@ -68,9 +68,23 @@ export async function unlockSeat(id: string) {
   });
 }
 
+export async function freeSeat(id: string) {
+  return await prisma.seat.updateMany({
+    where: { id, status: SeatStatus.BOOKED },
+    data: { status: SeatStatus.AVAILABLE, lockedAt: null, lockedBy: "" },
+  });
+}
+
 export async function getUserCart(userId: string){
   return await prisma.seat.findMany({
     where: { status : SeatStatus.LOCKED, lockedBy: userId},
+    include: { event : true }
+  });
+}
+
+export async function getUserBookedSeats(userId: string){
+  return await prisma.seat.findMany({
+    where: { status : SeatStatus.BOOKED, lockedBy: userId},
     include: { event : true }
   });
 }

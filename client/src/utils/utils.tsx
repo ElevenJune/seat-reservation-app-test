@@ -23,7 +23,8 @@ export function getOrCreateSessionId(): string {
 export const appRoutes = {
   events: () => "/events",
   event: (eventId: string) => `/events/${eventId}`,
-  lockSeat: (seatId: string, action: string) => `/seats/${seatId}/${action}`,
+  lockSeat: (seatId: string, action: 'lock'|'unlock'|'free') => `/seats/${seatId}/${action}`,
   bookSeats: () => "/seats/book",
-  getCart: () => "cart"
+  getCart: () => "cart",
+  getBookedSeats: () => "bookedSeats"
 };

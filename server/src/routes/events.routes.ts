@@ -8,6 +8,8 @@ import {
   unlockSeat,
   bookSeats,
   getUserCart,
+  getUserBookedSeats,
+  freeSeat,
 } from "../services/seatService";
 import {
   userSectionSchema,
@@ -86,6 +88,18 @@ export async function eventRoutes(app: FastifyInstance) {
     },
   );
 
+  fastify.get(
+    API_PATHS.BOOKED_SEATS,
+    { schema: getUserCartSchema },
+    async (request, reply) => {
+      const sessionId = request.headers["x-session-id"];
+      //const sessionId = "uiu"
+      const seats = await getUserBookedSeats(sessionId);
+      if (seats) return reply.status(200).send({ lockedSeats: seats });
+      else return reply.status(404).send({ error: "User does not exists" });
+    },
+  );
+
   fastify.post(
     API_PATHS.LOCK_SEAT,
     { schema: lockSeatSchema },
@@ -130,6 +144,22 @@ export async function eventRoutes(app: FastifyInstance) {
         return reply
           .status(404)
           .send({ error: "Seat already unlocked or not found" });
+      }
+
+      return reply.status(200).send({ seatId, locked: false });
+    },
+  );
+
+  fastify.post(
+    API_PATHS.FREE_SEAT,
+    { schema: lockSeatSchema },
+    async (request, reply) => {
+      const { seatId } = request.params;
+      const result = await freeSeat(seatId);
+      if (result.count === 0) {
+        return reply
+          .status(404)
+          .send({ error: "Seat already freed or not found" });
       }
 
       return reply.status(200).send({ seatId, locked: false });

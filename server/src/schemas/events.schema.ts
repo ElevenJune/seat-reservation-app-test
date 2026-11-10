@@ -99,7 +99,7 @@ export const bookSeatsSchema = {
 
 export type BookSeatsResponse = z.infer<(typeof bookSeatsSchema.response)[200]>;
 
-export const CartItemSchema = SeatSchema.extend({
+export const SeatWithEventSchema = SeatSchema.extend({
   event: EventSchema
 })
 
@@ -109,7 +109,7 @@ export const getUserCartSchema = {
   }),
   response: {
     200: z.object({
-      lockedSeats: z.array(CartItemSchema),
+      lockedSeats: z.array(SeatWithEventSchema),
     }),
     "4xx": z.object({
       error: z.string(),

@@ -7,7 +7,6 @@ import { appRoutes } from "../utils/utils";
 import {
   type GetUserCartResponse,
   type LockSeatResponse,
-  type EventError,
 } from "@server/constants/types";
 
 import "./Cart.css"

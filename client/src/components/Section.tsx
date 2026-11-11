@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useRef } from "react";
+import { useMemo, useState, useEffect, useRef, useContext } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import apiClient from "../api/axios";
@@ -11,10 +11,11 @@ import { RoundedButton } from "./Widgets/RoundedButton";
 import { Loading } from "./Widgets/Loading";
 import {  SeatStatus } from "../types/seat";
 import type { Event } from "@server/schemas/types";
+import { CartContext } from "../context/cart-context";
 import {
   type GetEventResponse,
   type LockSeatResponse,
-  type PublicSeat,
+  type PublicSeat as SeatType,
   type EventError,
 } from "@server/constants/types";
 
@@ -23,7 +24,7 @@ interface SectionProps {}
 export const Section: React.FC<SectionProps> = ({}) => {
   const { id: eventId } = useParams<{ id: string }>();
 
-  const [seats, setSeats] = useState<PublicSeat[]>([]);
+  const [seats, setSeats] = useState<SeatType[]>([]);
   const [event, setEvent] = useState<Event | null>(null);
   const userSeats = useMemo(()=> seats.filter(
     (s) =>
@@ -43,6 +44,8 @@ export const Section: React.FC<SectionProps> = ({}) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<number>(null);
+
+  const cartCtx = useContext(CartContext);
 
   const rows = useMemo(() => {
     return seats.reduce((acc: string[], seat) => {
@@ -119,7 +122,10 @@ export const Section: React.FC<SectionProps> = ({}) => {
     apiClient
       .post<LockSeatResponse>(appRoutes.lockSeat(seatId, action))
       .then((response) => {
-        if (response.status === 200) updateSeats(eventId);
+        if (response.status === 200){
+          updateSeats(eventId);
+          cartCtx?.refresh()
+        }
       });
   }
 

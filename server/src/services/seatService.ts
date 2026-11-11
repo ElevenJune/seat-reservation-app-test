@@ -1,5 +1,6 @@
-import { boolean } from "zod";
 import { prisma, SeatStatus } from "../lib/prisma";
+import { type Seat } from "../generated/prisma";
+import { type PublicSeat } from "../schemas/events.schema";
 
 export async function releaseExpiredSeats() {
   const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
@@ -24,6 +25,24 @@ export enum LockSeatError {
   UPDATE_FAILED = 2,
   NO_EVENT = 3,
 }
+
+function isHeldBy(seat: Seat, sessionId?:string){
+  return !!sessionId && seat.status!==SeatStatus.AVAILABLE && seat.lockedBy === sessionId
+}
+
+export function toPublicSeat(seat: Seat, sessionId?:string): PublicSeat {
+  return{
+    id: seat.id,
+    row: seat.row,
+    number: seat.number,
+    status: seat.status,
+    price: seat.price,
+    updatedAt: seat.updatedAt,
+    eventId: seat.eventId,
+    isMine: isHeldBy(seat,sessionId)
+  };
+}
+
 export async function lockSeat(
   id: string,
   sessionId: string,
@@ -78,16 +97,18 @@ export async function freeSeat(id: string, sessionId: string) {
   });
 }
 
-export async function getUserCart(userId: string){
+export async function getUserCart(sessionId: string){
   return await prisma.seat.findMany({
-    where: { status : SeatStatus.LOCKED, lockedBy: userId},
+    where: { status : SeatStatus.LOCKED, lockedBy: sessionId},
+    //omit: { lockedBy: true, lockedAt: true },
     include: { event : true }
   });
 }
 
-export async function getUserBookedSeats(userId: string){
+export async function getUserBookedSeats(sessionId: string){
   return await prisma.seat.findMany({
-    where: { status : SeatStatus.BOOKED, lockedBy: userId},
+    where: { status : SeatStatus.BOOKED, lockedBy: sessionId},
+    //omit: { lockedBy: true, lockedAt: true },
     include: { event : true }
   });
 }

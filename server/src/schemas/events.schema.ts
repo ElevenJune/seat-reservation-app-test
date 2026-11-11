@@ -1,6 +1,5 @@
-import { boolean, number, properties, z } from "zod";
+import { z } from "zod";
 import { EventSchema, SeatSchema } from "../generated/zod";
-import { required } from "zod/mini";
 import { SESSION_HEADER } from "../constants/routes";
 
 const optionalBoolSchema = (defaultValue = false) =>
@@ -17,7 +16,6 @@ const optionalBoolSchema = (defaultValue = false) =>
     .pipe(z.boolean().optional())
     .default(defaultValue);
 
-export const RowEnum = z.enum(["A", "B", "C", "D"]);
 export const EventErrorSchema = z.object({
   error: z.string(),
   statusCode: z.number().optional(),
@@ -30,29 +28,25 @@ export const sessionHeaders = z.object({
 });
 
 // ===== Schemas
-export const userSectionSchema = {
-  // Paramètres d'URL (:row)
-  params: z.object({
-    row: RowEnum,
-  }),
-  // Paramètres de query (?asc=true)
-  querystring: z.object({
-    asc: optionalBoolSchema(true),
-  }),
-};
+// Public DTO: never expose lockedBy (it is another user's session ID).
+export const PublicSeatSchema = SeatSchema.omit({
+  lockedBy: true,
+  lockedAt: true,
+}).extend({ isMine: z.boolean() });
+export type PublicSeat = z.infer<typeof PublicSeatSchema>;
 
 export const eventSchema = {
   params: z.object({
-    //Factorize when needed
     id: z.string().optional(),
   }),
+  headers: sessionHeaders.partial(),
   querystring: z.object({
     seats: optionalBoolSchema(true),
   }),
   response: {
     200: z.object({
       event: EventSchema.extend({
-        seats: z.array(SeatSchema).optional(),
+        seats: z.array(PublicSeatSchema).optional(),
       }),
     }),
     "4xx": EventErrorSchema,
@@ -90,7 +84,7 @@ export const bookSeatsSchema = {
   headers: sessionHeaders,
   response: {
     200: z.object({
-      sessionId: z.string()
+      sessionId: z.string(),
     }),
     "4xx": z.object({
       error: z.string(),
@@ -100,9 +94,9 @@ export const bookSeatsSchema = {
 
 export type BookSeatsResponse = z.infer<(typeof bookSeatsSchema.response)[200]>;
 
-export const SeatWithEventSchema = SeatSchema.extend({
-  event: EventSchema
-})
+export const SeatWithEventSchema = PublicSeatSchema.extend({
+  event: EventSchema,
+});
 
 export const getUserCartSchema = {
   headers: sessionHeaders,
@@ -116,4 +110,6 @@ export const getUserCartSchema = {
   },
 };
 
-export type GetUserCartResponse = z.infer<(typeof getUserCartSchema.response)[200]>;
+export type GetUserCartResponse = z.infer<
+  (typeof getUserCartSchema.response)[200]
+>;

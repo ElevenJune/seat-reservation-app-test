@@ -3,6 +3,6 @@ export type {
   GetEventsResponse,
   LockSeatResponse,
   GetUserCartResponse,
-  RowEnum,
+  PublicSeat,
   EventError
 } from "../schemas/events.schema";

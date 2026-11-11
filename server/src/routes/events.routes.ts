@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
-import { prisma, SeatStatus } from "../lib/prisma";
+import { prisma } from "../lib/prisma";
 import {
   releaseExpiredSeats,
   lockSeat,
@@ -10,13 +10,13 @@ import {
   getUserCart,
   getUserBookedSeats,
   freeSeat,
+  toPublicSeat,
 } from "../services/seatService";
 import {
   eventSchema,
   eventsSchema,
   lockSeatSchema,
   bookSeatsSchema,
-  EventError,
   getUserCartSchema,
 } from "../schemas/events.schema";
 import { API_PATHS, SESSION_HEADER } from "../constants/routes";
@@ -24,7 +24,7 @@ import { API_PATHS, SESSION_HEADER } from "../constants/routes";
 export async function eventRoutes(app: FastifyInstance) {
   const fastify = app.withTypeProvider<ZodTypeProvider>();
 
-  fastify.addHook("preHandler", async (request, reply) => {
+  fastify.addHook("preHandler", async (request, _reply) => {
     if (request.url.includes("seat") || request.url.includes("events"))
       await releaseExpiredSeats();
   });
@@ -33,6 +33,7 @@ export async function eventRoutes(app: FastifyInstance) {
     API_PATHS.EVENT_BY_ID,
     { schema: eventSchema },
     async (request, reply) => {
+      const sessionId = request.headers[SESSION_HEADER];
       const { id } = request.params;
       const { seats } = request.query;
       const event = await prisma.event.findUnique({
@@ -41,18 +42,20 @@ export async function eventRoutes(app: FastifyInstance) {
         },
         where: { id: id },
       });
-      if (event) return { event };
-      else
+      if(!event)
         return reply
           .status(404)
           .send({ error: "No event found with ID " + id });
+      return reply
+        .status(200)
+        .send({event : { ...event, seats:(event.seats?.map((s)=>toPublicSeat(s,sessionId))) }});
     },
   );
 
   fastify.get(
     API_PATHS.EVENTS,
     { schema: eventsSchema },
-    async (request, reply) => {
+    async (_request, reply) => {
       const events = await prisma.event.findMany();
       if (events) return { events };
       else return reply.status(404).send({ error: "No event found " });
@@ -65,7 +68,8 @@ export async function eventRoutes(app: FastifyInstance) {
     async (request, reply) => {
       const sessionId = request.headers[SESSION_HEADER];
       const seats = await getUserCart(sessionId);
-      if (seats) return reply.status(200).send({ lockedSeats: seats });
+      const publicSeats = seats.map((seat) => ({...toPublicSeat(seat, sessionId), event:seat.event}));
+      if (seats) return reply.status(200).send({ lockedSeats: publicSeats} );
       else return reply.status(404).send({ error: "User does not exists" });
     },
   );
@@ -76,7 +80,8 @@ export async function eventRoutes(app: FastifyInstance) {
     async (request, reply) => {
       const sessionId = request.headers[SESSION_HEADER];
       const seats = await getUserBookedSeats(sessionId);
-      if (seats) return reply.status(200).send({ lockedSeats: seats });
+      const publicSeats = seats.map((seat) => ({...toPublicSeat(seat, sessionId), event:seat.event}));
+      if (seats) return reply.status(200).send({ lockedSeats: publicSeats });
       else return reply.status(404).send({ error: "User does not exists" });
     },
   );

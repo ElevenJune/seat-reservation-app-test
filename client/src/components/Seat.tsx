@@ -19,6 +19,7 @@ export const Seat: React.FC<SeatProps> = ({ row, number, status, yours=false, on
   };
 
   const isBooked = status === SeatStatus.BOOKED;
+  const lockedBySomeoneElse = status === SeatStatus.LOCKED && !yours;
   let statusClass = statusClassMap[status] || 'available';
   if(isBooked && yours) statusClass+=' yours'
 
@@ -26,7 +27,7 @@ export const Seat: React.FC<SeatProps> = ({ row, number, status, yours=false, on
     <button
       type="button"
       className={`seat ${statusClass}`}
-      disabled={isBooked}
+      disabled={isBooked||lockedBySomeoneElse}
       onClick={() => onClick?.(row, number)}
     >
       {row ? `${row}${number}` : number}

@@ -16,7 +16,6 @@ export const Toolbar = () => {
     useEffect(() => {
       setIsHome(location.pathname==="/")
       setIsCart(location.pathname==="/cart")
-      cartCtx.refresh()
     }, [location]);
 
   return (

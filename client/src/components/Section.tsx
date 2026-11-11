@@ -15,7 +15,7 @@ import { useCart } from "../context/cart-context";
 import {
   type GetEventResponse,
   type LockSeatResponse,
-  type PublicSeat as SeatType,
+  type PublicSeat,
   type EventError,
 } from "@server/constants/types";
 
@@ -24,7 +24,7 @@ interface SectionProps {}
 export const Section: React.FC<SectionProps> = ({}) => {
   const { id: eventId } = useParams<{ id: string }>();
 
-  const [seats, setSeats] = useState<SeatType[]>([]);
+  const [seats, setSeats] = useState<PublicSeat[]>([]);
   const [event, setEvent] = useState<Event | null>(null);
   const userSeats = useMemo(()=> seats.filter(
     (s) =>

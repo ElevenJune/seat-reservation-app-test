@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useRef, useContext } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import apiClient from "../api/axios";
@@ -11,7 +11,7 @@ import { RoundedButton } from "./Widgets/RoundedButton";
 import { Loading } from "./Widgets/Loading";
 import {  SeatStatus } from "../types/seat";
 import type { Event } from "@server/schemas/types";
-import { CartContext } from "../context/cart-context";
+import { useCart } from "../context/cart-context";
 import {
   type GetEventResponse,
   type LockSeatResponse,
@@ -45,7 +45,7 @@ export const Section: React.FC<SectionProps> = ({}) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<number>(null);
 
-  const cartCtx = useContext(CartContext);
+  const cartCtx = useCart()
 
   const rows = useMemo(() => {
     return seats.reduce((acc: string[], seat) => {
@@ -124,7 +124,7 @@ export const Section: React.FC<SectionProps> = ({}) => {
       .then((response) => {
         if (response.status === 200){
           updateSeats(eventId);
-          cartCtx?.refresh()
+          cartCtx.refresh()
         }
       });
   }

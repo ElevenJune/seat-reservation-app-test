@@ -1,30 +1,38 @@
-import { createContext, useState } from "react";
+import { createContext, useState, use, useEffect } from "react";
 import apiClient from "../api/axios";
 import type { GetUserCartResponse } from "@server/schemas/events.schema";
 import { appRoutes } from "../utils/utils";
-import type { CartContextType } from "../types/cart";
 
-export const CartContext = createContext<CartContextType | null>(null);
+export type CartContextType = {
+  count: number;
+  refresh: () => Promise<void>;
+};
 
-export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+const CartContext = createContext<CartContextType | null>(null);
+
+export const useCart = () => {
+  const useCartContext = use(CartContext);
+
+  if (!useCartContext) {
+    throw new Error("useCart has to be used within <CartProvider>");
+  }
+
+  return useCartContext;
+};
+export function CartProvider({ children }: { children: React.ReactNode }) {
   const [count, setCount] = useState<number>(0);
 
-  function getUserCart() {
+  const refresh = () => {
     return apiClient
       .get<GetUserCartResponse>(appRoutes.getCart())
       .then((response) => {
         setCount(response.data.lockedSeats.length);
       });
-  }
-  const refresh = () => {
-    return getUserCart();
   };
 
-  return (
-    <CartContext.Provider value={{ count, refresh }}>
-      {children}
-    </CartContext.Provider>
-  );
-};
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
+
+  return <CartContext value={{ count, refresh }}>{children}</CartContext>;
+}

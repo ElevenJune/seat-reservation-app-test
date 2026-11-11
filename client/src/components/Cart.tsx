@@ -1,10 +1,10 @@
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { VLayout, HLayout } from "./Navigation/Layout";
 import { RoundedButton } from "./Widgets/RoundedButton";
 import apiClient from "../api/axios";
 import { appRoutes } from "../utils/utils";
-import { CartContext } from "../context/cart-context";
+import { useCart } from "../context/cart-context";
 import {
   type GetUserCartResponse,
   type LockSeatResponse,
@@ -18,7 +18,7 @@ export const Cart: React.FC<{}> = () => {
   let isCartEmpty = !(cartContent && cartContent.lockedSeats.length > 0);
   let isBookedEmpty = !(bookedSeats && bookedSeats.lockedSeats.length > 0);
 
-  const cartCtx = useContext(CartContext);
+  const cartCtx = useCart()
 
   let navigate = useNavigate();
 
@@ -46,7 +46,7 @@ export const Cart: React.FC<{}> = () => {
       if (response.status === 200) {
         getUserCart();
         getBookedSeats();
-        cartCtx?.refresh();
+        cartCtx.refresh();
       }
     });
   }
@@ -57,7 +57,7 @@ export const Cart: React.FC<{}> = () => {
       .then((response) => {
         if (response.status === 200) {
           getUserCart();
-          cartCtx?.refresh();
+          cartCtx.refresh();
         }
       });
   }

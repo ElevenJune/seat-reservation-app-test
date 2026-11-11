@@ -8,3 +8,7 @@ export const API_PATHS = {
   CART: '/api/cart',
   BOOKED_SEATS: '/api/bookedSeats'
 } as const;
+
+// The user session is always carried by this header,
+// set on the client side by the axios request interceptor.
+export const SESSION_HEADER = "x-session-id";

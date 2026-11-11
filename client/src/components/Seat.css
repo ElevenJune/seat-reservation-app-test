@@ -25,6 +25,10 @@
 .locked {
   background-color: #f59e0b;
 }
+.locked:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
 
 .booked {
   background-color: #9ca3af;

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getOrCreateSessionId } from "../utils/utils";
 import { VLayout, HLayout } from "./Navigation/Layout";
 import { RoundedButton } from "./Widgets/RoundedButton";
 import apiClient from "../api/axios";
@@ -8,7 +7,6 @@ import { appRoutes } from "../utils/utils";
 import {
   type GetUserCartResponse,
   type LockSeatResponse,
-  type EventError,
 } from "@server/constants/types";
 
 import "./Cart.css"
@@ -27,30 +25,24 @@ export const Cart: React.FC<{}> = () => {
   }, []);
 
   function getUserCart() {
-    const sessionId = getOrCreateSessionId();
     apiClient
-      .get<GetUserCartResponse>(appRoutes.getCart(), {
-        headers: { "x-session-id": sessionId },
-      })
+      .get<GetUserCartResponse>(appRoutes.getCart())
       .then((response) => {
         setCartContent(response.data)
       });
   }
 
   function getBookedSeats() {
-    const sessionId = getOrCreateSessionId();
     apiClient
-      .get<GetUserCartResponse>(appRoutes.getBookedSeats(), {
-        headers: { "x-session-id": sessionId },
-      })
+      .get<GetUserCartResponse>(appRoutes.getBookedSeats())
       .then((response) => {
         setBookedSeats(response.data)
       });
   }
 
-    function bookSeats(sessionId: string) {
+    function bookSeats() {
       apiClient
-        .post<LockSeatResponse>(appRoutes.bookSeats(), { sessionId })
+        .post<LockSeatResponse>(appRoutes.bookSeats())
         .then((response) => {
           if (response.status === 200){
             getUserCart();
@@ -61,9 +53,7 @@ export const Cart: React.FC<{}> = () => {
 
     function removeSeat(seatId:string){
       apiClient
-      .post<LockSeatResponse>(appRoutes.lockSeat(seatId, "unlock"), {
-        sessionId: getOrCreateSessionId(),
-      })
+      .post<LockSeatResponse>(appRoutes.lockSeat(seatId, "unlock"))
       .then((response) => {
         if (response.status === 200) getUserCart();
       });
@@ -71,9 +61,7 @@ export const Cart: React.FC<{}> = () => {
 
     function cancelSeat(seatId:string){
       apiClient
-      .post<LockSeatResponse>(appRoutes.lockSeat(seatId, "free"), {
-        sessionId: getOrCreateSessionId(),
-      })
+      .post<LockSeatResponse>(appRoutes.lockSeat(seatId, "free"))
       .then((response) => {
         if (response.status === 200) getBookedSeats();
       });
@@ -104,7 +92,7 @@ export const Cart: React.FC<{}> = () => {
     <VLayout className="page-container" justify="start" gap="10px">
         <h2 className="mt-header">Cart</h2>
         {component}
-        <RoundedButton hidden={isCartEmpty} additionalClassName="bookButton" onClick={()=>{bookSeats(getOrCreateSessionId())}} >Réserver</RoundedButton>
+        <RoundedButton hidden={isCartEmpty} additionalClassName="bookButton" onClick={bookSeats} >Réserver</RoundedButton>
         <h2 className="mt-header">Your booked Seats</h2>
         {component2}
     </VLayout>

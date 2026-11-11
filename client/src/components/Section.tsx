@@ -3,17 +3,18 @@ import { useNavigate, useParams } from "react-router-dom";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import apiClient from "../api/axios";
 
-import { formatDate, getOrCreateSessionId, appRoutes } from "../utils/utils";
+import { formatDate, appRoutes } from "../utils/utils";
 import "./Section.css";
 import { Seat } from "./Seat";
 import { HLayout, VLayout } from "./Navigation/Layout";
 import { RoundedButton } from "./Widgets/RoundedButton";
 import { Loading } from "./Widgets/Loading";
-import { type SeatType, SeatStatus } from "../types/seat";
+import {  SeatStatus } from "../types/seat";
 import type { Event } from "@server/schemas/types";
 import {
   type GetEventResponse,
   type LockSeatResponse,
+  type PublicSeat,
   type EventError,
 } from "@server/constants/types";
 
@@ -22,11 +23,11 @@ interface SectionProps {}
 export const Section: React.FC<SectionProps> = ({}) => {
   const { id: eventId } = useParams<{ id: string }>();
 
-  const [seats, setSeats] = useState<SeatType[]>([]);
+  const [seats, setSeats] = useState<PublicSeat[]>([]);
   const [event, setEvent] = useState<Event | null>(null);
   const userSeats = useMemo(()=> seats.filter(
     (s) =>
-      s.lockedBy === getOrCreateSessionId() &&
+      s.isMine &&
       s.eventId === eventId &&
       (s.status === SeatStatus.BOOKED || s.status == SeatStatus.LOCKED),
   ),[seats,eventId]);
@@ -111,13 +112,12 @@ export const Section: React.FC<SectionProps> = ({}) => {
       selectedSeat?.status === SeatStatus.LOCKED ? "unlock" : "lock";
     if (
       selectedSeat?.status === SeatStatus.BOOKED ||
-      (action == "lock" && isLimitReached)
+      (action === "lock" && isLimitReached) ||
+      (!selectedSeat?.isMine && action==="unlock")
     )
       return;
     apiClient
-      .post<LockSeatResponse>(appRoutes.lockSeat(seatId, action), {
-        sessionId: getOrCreateSessionId(),
-      })
+      .post<LockSeatResponse>(appRoutes.lockSeat(seatId, action))
       .then((response) => {
         if (response.status === 200) updateSeats(eventId);
       });
@@ -179,7 +179,7 @@ export const Section: React.FC<SectionProps> = ({}) => {
                         number={seat.number}
                         status={seat.status}
                         key={seat.id}
-                        yours={seat.lockedBy === getOrCreateSessionId()}
+                        yours={seat.isMine}
                         onClick={() => toggleSeat(seat.id)}
                       />
                     ))}

@@ -2,7 +2,6 @@ import React from "react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { Event } from "@server/schemas/types";
-import { AxiosError, isAxiosError } from "axios";
 import apiClient from "../api/axios";
 
 import "./EventSelector.css";
@@ -12,7 +11,6 @@ import { VLayout } from "./Navigation/Layout";
 
 import {
   type GetEventsResponse,
-  type EventError,
 } from "@server/constants/types";
 
 interface EventSelectorProps {}

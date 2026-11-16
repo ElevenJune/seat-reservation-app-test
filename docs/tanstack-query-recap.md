@@ -355,8 +355,9 @@ Procédure suivie (aucune réécriture d'historique) :
 5. commit `1e1b6da` : git détecte des **renommages** (`client/…` → `apps/client/…`), donc
    `git log --follow` retrouve l'historique ; branches et `origin` conservés.
 
-Rien n'est suivi par défaut dans `docs/` ni les PDF : décision à prendre. Les autres branches gardent
-les anciens chemins jusqu'à leur fusion.
+`docs/` est versionné depuis (`5897166`). Les PDF de cours restent volontairement hors git. La migration
+a été fusionnée dans `develop` (`02d4c0e`) sans conflit : git a suivi les renommages. Les branches non
+fusionnées gardent les anciens chemins.
 
 ---
 

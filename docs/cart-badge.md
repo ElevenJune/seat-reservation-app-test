@@ -129,4 +129,5 @@ Note ce que tu constates : ce sera ta liste de « pourquoi TanStack Query ».
 - [x] `ed26981` Refactored to useCart
 - [ ] Stabilité (`useCallback` / `useMemo`) + chargement initial dans le provider + badge masqué à 0
 - [ ] Petits nettoyages (façade, nommage)
-- [ ] Vérifications, puis relecture du diff avant fusion dans `develop`
+- [x] Vérifications faites. Cette branche n'a pas été fusionnée seule : ses commits sont entrés dans
+  `develop` avec la migration TanStack Query (`02d4c0e`), qui a supprimé le contexte.

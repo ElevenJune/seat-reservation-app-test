@@ -1,6 +1,6 @@
 # Migration vers TanStack Query
 
-Branche : `feature/tanstack-query`, créée depuis `feature/cart-badge`. C'est **elle** qu'on fusionne dans `develop`.
+Branche : `feature/tanstack-query`, créée depuis `feature/cart-badge`. **Fusionnée dans `develop`** (merge `02d4c0e`).
 Migration commitée dans `b2edd8e`. Le récap complet avec schémas : [`tanstack-query-recap.md`](tanstack-query-recap.md).
 
 ## 🎯 La destination
@@ -152,14 +152,16 @@ Il ne reste que des **finitions** et une **dette assumée**.
 
 ## 🧭 La route
 
-### Avant de fusionner : valider la branche
+### Limite connue à traiter plus tard : relecture périodique du panier
 
-Reprends le tableau « Limite constatée » et **teste chaque ligne** dans le navigateur (voir la section
-suivante). Si tout passe, relire le diff dans git-cola, puis fusionner `feature/tanstack-query` dans `develop`.
+Constat (test avant fusion) : un verrou modifié **hors de l'app** (Prisma Studio) met `Section` à jour
+(son `setInterval` relit) mais **pas** le badge. Aucun déclencheur ne relit `["cart"]` : ni invalidation,
+ni montage, ni retour d'onglet, ni `refetchInterval`. Ce n'est pas un bug des mutations, c'est la ligne
+« Expiration côté serveur ignorée » du tableau du début, non implémentée.
 
 Repères :
-- Les autres branches gardent les anciens chemins (`client/…` au lieu de `apps/client/…`) : la
-  fusion verra des renommages. Que se passe-t-il si `develop` a bougé entre-temps ?
+- Quelle fréquence de relecture, sur quelles pages ? Un verrou expire après dix minutes.
+- À traiter avec l'étape 5 (`refetchInterval`) ou séparément ?
 
 ### (Optionnel, autre branche) Étape 5 — Les sièges d'un événement
 
@@ -195,4 +197,5 @@ Repères :
 - [x] `6ae6268` Reformatage de `cart-context.tsx`
 - [x] `b2edd8e` Migrate cart state to TanStack Query (provider, lectures, mutations, contexte supprimé)
 - [x] `1e1b6da` Move repository root up one level
-- [ ] Relecture du diff dans git-cola, tests des limites, puis fusion dans `develop`
+- [x] `5897166` Add learning guides, notes and roadmap
+- [x] `02d4c0e` Merge de `feature/tanstack-query` dans `develop`

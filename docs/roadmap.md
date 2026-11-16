@@ -5,11 +5,12 @@ Failles 1 et 2 ✅ (fusionnées dans `develop`). Tâches classées par valeur / 
 ## 1. Fonctionnalités
 
 - [x] **Badge du panier, version contexte** (pédagogique) → `feature/cart-badge`, guide
-      `docs/cart-badge.md`. **Pas fusionnée** : sert de base à la migration TanStack Query.
+      `docs/cart-badge.md`. Branche **jamais fusionnée seule** : base de la migration TanStack Query
+      (ses commits sont dans l'historique de `develop` via cette migration).
 - [x] **Badge du panier, version TanStack Query** → `feature/tanstack-query` (commit `b2edd8e`), créée
       **depuis `feature/cart-badge`**. Contexte supprimé, panier **et** réservés dans le cache, mutations
       qui invalident. Guide `docs/tanstack-query.md`, récap `docs/tanstack-query-recap.md`.
-      **Reste : tester les limites, relire le diff, fusionner dans `develop`.**
+      **Fusionnée dans `develop`** (merge `02d4c0e`).
 - [ ] **Compte à rebours du verrou** : `lockExpiresAt` (seulement si `isMine`) + constante
       serveur `LOCK_TTL_MS` (remplace le `10 * 60 * 1000` en dur)
 
@@ -66,9 +67,10 @@ Failles 1 et 2 ✅ (fusionnées dans `develop`). Tâches classées par valeur / 
 - [x] Déplacer `.git` de `apps/` à la racine (commit `1e1b6da`) : `pnpm-lock.yaml`, `package.json`
       racine, `pnpm-workspace.yaml` et `.vscode/` sont maintenant versionnés. Historique conservé
       (renommages `client/…` → `apps/client/…`).
-- [ ] **Décider** quoi versionner à la racine : `docs/` (guides, roadmap) et les PDF de cours sont
-      aujourd'hui **non suivis** (les PDF partiraient sur GitHub au prochain push)
-- [ ] Après la fusion : les branches non fusionnées (`feature/cart-badge`…) gardent les anciens chemins
+- [x] `docs/` est versionné (commit `5897166`). Les **PDF de cours** restent volontairement **hors git**
+      (non suivis, à ne pas committer)
+- [ ] Les branches non fusionnées (`feature/cart-badge`) gardent les anciens chemins (`client/…`) ;
+      supprimer `feature/tanstack-query` et `feature/cart-badge` si elles ne servent plus
 - [ ] Traduire les commentaires restants en anglais
 
 ---
@@ -98,6 +100,6 @@ Failles 1 et 2 ✅ (fusionnées dans `develop`). Tâches classées par valeur / 
 2. Observer les limites (cf. `docs/cart-badge.md`) : rafraîchissements oubliés, expiration,
    deux onglets, requêtes en double, pas de loading ni d'erreur, re-rendus inutiles.
 3. ✅ Migrer vers TanStack Query sur `feature/tanstack-query` (depuis `feature/cart-badge`).
-4. Tester les limites, puis fusionner dans `develop`.
+4. ✅ Fusionné dans `develop` (`02d4c0e`).
 
 Le serveur n'a besoin de rien : `GET /cart` existe, le compte = `lockedSeats.length`.

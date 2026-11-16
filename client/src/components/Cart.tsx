@@ -1,76 +1,34 @@
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { VLayout, HLayout } from "./Navigation/Layout";
 import { RoundedButton } from "./Widgets/RoundedButton";
-import apiClient from "../api/axios";
-import { appRoutes } from "../utils/utils";
-import { useCart } from "../context/cart-context";
-import {
-  type GetUserCartResponse,
-  type LockSeatResponse,
-} from "@server/constants/types";
+import { useCartContent, useBookedSeats } from "../api/cart";
+import { useLockSeat, useBookSeat } from "../api/seats";
 
 import "./Cart.css";
 
 export const Cart: React.FC<{}> = () => {
-  const [cartContent, setCartContent] = useState<GetUserCartResponse>();
-  const [bookedSeats, setBookedSeats] = useState<GetUserCartResponse>();
-  let isCartEmpty = !(cartContent && cartContent.lockedSeats.length > 0);
-  let isBookedEmpty = !(bookedSeats && bookedSeats.lockedSeats.length > 0);
+  //const [bookedSeats, setBookedSeats] = useState<GetUserCartResponse>();
+  const bookedSeatsQuery = useBookedSeats();
+  const cartQuery = useCartContent();
 
-  const cartCtx = useCart()
+  const lockSeat = useLockSeat();
+  const bookSeats = useBookSeat();
 
   let navigate = useNavigate();
 
-  useEffect(() => {
-    getUserCart();
-    getBookedSeats();
-  }, []);
-
-  function getUserCart() {
-    apiClient.get<GetUserCartResponse>(appRoutes.getCart()).then((response) => {
-      setCartContent(response.data);
-    });
-  }
-
-  function getBookedSeats() {
-    apiClient
-      .get<GetUserCartResponse>(appRoutes.getBookedSeats())
-      .then((response) => {
-        setBookedSeats(response.data);
-      });
-  }
-
-  function bookSeats() {
-    apiClient.post<LockSeatResponse>(appRoutes.bookSeats()).then((response) => {
-      if (response.status === 200) {
-        getUserCart();
-        getBookedSeats();
-        cartCtx.refresh();
-      }
-    });
+  function book() {
+    bookSeats.mutate(undefined);
   }
 
   function removeSeat(seatId: string) {
-    apiClient
-      .post<LockSeatResponse>(appRoutes.lockSeat(seatId, "unlock"))
-      .then((response) => {
-        if (response.status === 200) {
-          getUserCart();
-          cartCtx.refresh();
-        }
-      });
+    lockSeat.mutate({ seatId, action: "unlock" });
   }
 
   function cancelSeat(seatId: string) {
-    apiClient
-      .post<LockSeatResponse>(appRoutes.lockSeat(seatId, "free"))
-      .then((response) => {
-        if (response.status === 200) getBookedSeats();
-      });
+    lockSeat.mutate({ seatId, action: "free" });
   }
 
-  let list = cartContent?.lockedSeats.map((seat) => (
+  let list = cartQuery.data?.lockedSeats.map((seat) => (
     <HLayout
       className="cartItem"
       align="stretch"
@@ -100,7 +58,7 @@ export const Cart: React.FC<{}> = () => {
     </HLayout>
   ));
 
-  let booked = bookedSeats?.lockedSeats.map((seat) => (
+  let booked = bookedSeatsQuery.data?.lockedSeats.map((seat) => (
     <HLayout
       className="cartItem"
       align="stretch"
@@ -130,26 +88,35 @@ export const Cart: React.FC<{}> = () => {
     </HLayout>
   ));
 
-  let component = !isCartEmpty ? list : <i>Cart is empty</i>;
-  let component2 = !isBookedEmpty ? (
-    booked
-  ) : (
-    <i>You don't have any booked seat</i>
-  );
+  function renderCart() {
+    if (cartQuery.isPending) return <i>Loading...</i>;
+    if (cartQuery.isError) return <i>{"Error: " + cartQuery.error}</i>;
+    if (cartQuery.data.lockedSeats.length === 0) return <i>Cart is empty</i>;
+    return list;
+  }
+
+  function renderBookedSeats() {
+    if (bookedSeatsQuery.isPending) return <i>Loading...</i>;
+    if (bookedSeatsQuery.isError)
+      return <i>{"Error: " + bookedSeatsQuery.error}</i>;
+    if (bookedSeatsQuery.data.lockedSeats.length === 0)
+      return <i>You don't have any booked seat</i>;
+    return booked;
+  }
 
   return (
     <VLayout className="page-container" justify="start" gap="10px">
       <h2 className="mt-header">Cart</h2>
-      {component}
+      {renderCart()}
       <RoundedButton
-        hidden={isCartEmpty}
+        hidden={!cartQuery.data||cartQuery.data.lockedSeats.length==0}
         additionalClassName="bookButton"
-        onClick={bookSeats}
+        onClick={book}
       >
         Réserver
       </RoundedButton>
       <h2 className="mt-header">Your booked Seats</h2>
-      {component2}
+      {renderBookedSeats()}
     </VLayout>
   );
 };

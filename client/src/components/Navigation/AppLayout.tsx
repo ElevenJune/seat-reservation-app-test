@@ -2,12 +2,10 @@ import { Outlet } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { Toolbar } from "./Toolbar";
 import { VLayout } from "./Layout";
-import { CartProvider } from "../../context/cart-context";
 
 export function AppLayout() {
   return (
     <VLayout style={{ backgroundColor: "var(--background)", height: "100vh" }}>
-      <CartProvider>
         <Toolbar />
         <main
           style={{
@@ -20,7 +18,6 @@ export function AppLayout() {
           <Outlet />
           <Toaster />
         </main>
-      </CartProvider>
     </VLayout>
   );
 }

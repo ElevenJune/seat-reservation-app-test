@@ -7,17 +7,18 @@ import { Cart } from "./components/Cart";
 import { AppLayout } from "./components/Navigation/AppLayout";
 
 function App() {
-  const router = createBrowserRouter([{
-    element:<AppLayout/>,
-    children:[
-    { path: "/", element: <EventSelector /> },
-    { path: "/event/:id", element: <Section /> },
-    { path: "/cart", element: <Cart />}
-  ]}]);
+  const router = createBrowserRouter([
+    {
+      element: <AppLayout />,
+      children: [
+        { path: "/", element: <EventSelector /> },
+        { path: "/event/:id", element: <Section /> },
+        { path: "/cart", element: <Cart /> },
+      ],
+    },
+  ]);
 
-  return (
-    <RouterProvider router={router} />
-  );
+  return <RouterProvider router={router} />;
 }
 
 export default App;

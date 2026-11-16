@@ -44,7 +44,6 @@ export function getApiErrorMessage(err: unknown): string {
 
   return "Unexpected error";
 }
-
 //instance.defaults.headers.common["Authorization"] = AUTH_TOKEN;
 
 export default apiClient;

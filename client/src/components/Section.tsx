@@ -11,10 +11,9 @@ import { RoundedButton } from "./Widgets/RoundedButton";
 import { Loading } from "./Widgets/Loading";
 import {  SeatStatus } from "../types/seat";
 import type { Event } from "@server/schemas/types";
-import { useCart } from "../context/cart-context";
+import { useLockSeat } from "../api/seats";
 import {
   type GetEventResponse,
-  type LockSeatResponse,
   type PublicSeat,
   type EventError,
 } from "@server/constants/types";
@@ -44,8 +43,6 @@ export const Section: React.FC<SectionProps> = ({}) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<number>(null);
-
-  const cartCtx = useCart()
 
   const rows = useMemo(() => {
     return seats.reduce((acc: string[], seat) => {
@@ -108,6 +105,7 @@ export const Section: React.FC<SectionProps> = ({}) => {
       });
   }
 
+  const lockSeat = useLockSeat();
   function toggleSeat(seatId: string) {
     if (!eventId) return;
     const selectedSeat = seats.find((seat) => seat.id === seatId);
@@ -119,14 +117,9 @@ export const Section: React.FC<SectionProps> = ({}) => {
       (!selectedSeat?.isMine && action==="unlock")
     )
       return;
-    apiClient
-      .post<LockSeatResponse>(appRoutes.lockSeat(seatId, action))
-      .then((response) => {
-        if (response.status === 200){
-          updateSeats(eventId);
-          cartCtx.refresh()
-        }
-      });
+    lockSeat.mutate({seatId,action},
+      {onSettled:()=>{updateSeats(eventId)}}
+    )
   }
 
   let component = null;

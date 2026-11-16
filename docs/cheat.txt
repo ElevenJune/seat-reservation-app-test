@@ -1,0 +1,12 @@
+#lancer l'env de dev
+pnpm dev
+
+#créer client
+pnpm create vite client --template react-ts
+cd client && pnpm add react@rc react-dom@rc
+
+#créer serveur
+mkdir apps/server && cd apps/server
+pnpm init
+pnpm add fastify @fastify/cors
+pnpm add -D typescript @types/node tsx

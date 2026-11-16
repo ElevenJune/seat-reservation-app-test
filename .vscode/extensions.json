@@ -1,0 +1,4 @@
+{
+  // Shows oxlint diagnostics live in the editor (underlines + Problems panel)
+  "recommendations": ["oxc.oxc-vscode"]
+}

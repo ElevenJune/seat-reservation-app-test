@@ -1,0 +1,64 @@
+{
+  // Ctrl+Shift+B runs the default build task: type-check both apps without running them.
+  // Errors show up in the Problems panel (Ctrl+Shift+M) and are underlined in the editor.
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "typecheck: server",
+      "type": "shell",
+      "command": "pnpm exec tsc --noEmit",
+      "options": { "cwd": "${workspaceFolder}/apps/server" },
+      "problemMatcher": {
+        "base": "$tsc",
+        "fileLocation": ["relative", "${workspaceFolder}/apps/server"]
+      },
+      "presentation": { "group": "typecheck", "clear": true, "reveal": "always" }
+    },
+    {
+      "label": "typecheck: client",
+      "type": "shell",
+      "command": "pnpm exec tsc -b --noEmit",
+      "options": { "cwd": "${workspaceFolder}/apps/client" },
+      "problemMatcher": {
+        "base": "$tsc",
+        "fileLocation": ["relative", "${workspaceFolder}/apps/client"]
+      },
+      "presentation": { "group": "typecheck", "clear": true, "reveal": "always" }
+    },
+    {
+      // oxlint in "unix" format: path:line:col: message [Severity/rule]
+      "label": "lint: client",
+      "type": "shell",
+      "command": "pnpm exec oxlint -f unix",
+      "options": { "cwd": "${workspaceFolder}/apps/client" },
+      "problemMatcher": {
+        "owner": "oxlint",
+        "fileLocation": ["relative", "${workspaceFolder}/apps/client"],
+        "pattern": {
+          "regexp": "^(.+?):(\\d+):(\\d+):\\s+(.*)\\s+\\[(Error|Warning)/(.+)\\]$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "message": 4,
+          "severity": 5,
+          "code": 6
+        }
+      },
+      "presentation": { "group": "typecheck", "clear": true, "reveal": "always" }
+    },
+    {
+      "label": "typecheck",
+      "dependsOn": ["typecheck: server", "typecheck: client"],
+      "dependsOrder": "parallel",
+      "problemMatcher": []
+    },
+    {
+      // Default build task (Ctrl+Shift+B): types (both apps) + lint, all at once.
+      "label": "check",
+      "dependsOn": ["typecheck: server", "typecheck: client", "lint: client"],
+      "dependsOrder": "parallel",
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": []
+    }
+  ]
+}
